@@ -1,32 +1,100 @@
-# React + TypeScript + Vite
+# Primexium Advisors — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Official React frontend for the [Primexium Advisors](https://primexiumadvisors.com) website and student management platform.
 
-Currently, two official plugins are available:
+**Repository:** [gullhassanmalik6/primexium-advisors-frontend](https://github.com/gullhassanmalik6/primexium-advisors-frontend)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech stack
 
-## React Compiler
+| Tool | Purpose |
+|------|---------|
+| React 19 + TypeScript | UI |
+| Vite 8 | Build & dev server |
+| Tailwind CSS 4 | Styling |
+| React Router 7 | Routing |
+| Axios | HTTP client |
+| React Hook Form + Zod | Forms & validation |
+| TanStack Query | Server state |
+| Framer Motion | Animation |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the Oxlint configuration
+- Public marketing site (home, services, countries, packages, contact, and more)
+- Study-abroad **eligibility checker**
+- Auth-ready API client (JWT access + refresh tokens)
+- Protected routes for student and admin portals (dashboards coming soon)
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Prerequisites
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- Node.js 20+ (recommended)
+- npm
+
+## Getting started
+
+```bash
+git clone https://github.com/gullhassanmalik6/primexium-advisors-frontend.git
+cd primexium-advisors-frontend
+npm install
+cp .env.example .env
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+App runs at [http://localhost:5173](http://localhost:5173).
+
+## Environment variables
+
+Copy `.env.example` to `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_BASE_URL` | FastAPI base URL including `/api/v1` |
+
+For production (e.g. Vercel), set this to your deployed API, such as:
+
+```env
+VITE_API_BASE_URL=https://api.primexiumadvisors.com/api/v1
+```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check and production build (`dist/`) |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run Oxlint |
+
+## Project structure
+
+```
+src/
+  api/           # Axios client & auth endpoints
+  components/    # UI, layout, home, eligibility
+  context/       # Auth context
+  layouts/       # Public layout
+  pages/         # Route pages
+  routes/        # Router + protected routes
+  schemas/       # Zod schemas
+  styles/        # Global CSS
+  types/         # TypeScript types
+  utils/         # Helpers
+```
+
+## Deploy (Vercel)
+
+1. Import this repository in [Vercel](https://vercel.com).
+2. Framework: **Vite**
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. Set `VITE_API_BASE_URL` in project environment variables.
+6. Deploy.
+
+Custom domain: point `primexiumadvisors.com` to the Vercel project.
+
+## Related
+
+- Backend API: [primexium-advisors-backend](https://github.com/gullhassanmalik6/primexium-advisors-backend)
