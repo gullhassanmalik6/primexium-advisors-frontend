@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #0b1f4d;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #d4af37;
+  --color-secondary-foreground: #0b1f4d;
+  --color-background: #ffffff;
+  --color-foreground: #111827;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+  --color-ring: #0b1f4d;
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0b1f4d;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-white/20 bg-white/70 shadow-lg backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-white/10 bg-primary/80 shadow-lg backdrop-blur-xl;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-secondary to-amber-300 bg-clip-text text-transparent;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+  }
+
+  .container-wide {
+    @apply mx-auto max-w-7xl;
+  }
+}
