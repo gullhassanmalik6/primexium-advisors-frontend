@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { FaExclamationTriangle } from 'react-icons/fa'
 import { PageIntro, PortalCard } from '@/components/student/PortalUI'
 import { PageLoader } from '@/components/common/PageElements'
 import { Button } from '@/components/ui/button'
@@ -12,7 +14,7 @@ import { getErrorMessage } from '@/api/client'
 import { authApi } from '@/api/auth'
 import { studentApi } from '@/api/student'
 import { useAuth } from '@/context/AuthContext'
-import { BRAND } from '@/constants'
+import { BRAND, ROUTES } from '@/constants'
 
 const profileSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -31,16 +33,29 @@ const passwordSchema = z
     path: ['confirmPassword'],
   })
 
+const deleteSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
+  confirmation: z
+    .string()
+    .refine((value) => value.trim().toUpperCase() === 'DELETE', {
+      message: 'Type DELETE to confirm',
+    }),
+})
+
 type ProfileFormValues = z.infer<typeof profileSchema>
 type PasswordFormValues = z.infer<typeof passwordSchema>
+type DeleteFormValues = z.infer<typeof deleteSchema>
 
 export default function StudentProfilePage() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false)
   const [email, setEmail] = useState('')
 
   const {
@@ -56,6 +71,11 @@ export default function StudentProfilePage() {
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
+  })
+
+  const deleteForm = useForm<DeleteFormValues>({
+    resolver: zodResolver(deleteSchema),
+    defaultValues: { password: '', confirmation: '' },
   })
 
   useEffect(() => {
@@ -109,6 +129,22 @@ export default function StudentProfilePage() {
       passwordForm.reset()
     } catch (err) {
       setPasswordError(getErrorMessage(err))
+    }
+  }
+
+  const onDeleteAccount = async (values: DeleteFormValues) => {
+    setDeleteError(null)
+    const confirmed = window.confirm(
+      'WARNING: This will permanently delete your account, applications, documents, messages, and appointments. This cannot be undone.\n\nDo you still want to delete your account?',
+    )
+    if (!confirmed) return
+
+    try {
+      await authApi.deleteAccount(values.password, values.confirmation)
+      logout()
+      navigate(ROUTES.home, { replace: true })
+    } catch (err) {
+      setDeleteError(getErrorMessage(err))
     }
   }
 
@@ -184,6 +220,87 @@ export default function StudentProfilePage() {
             </Button>
           </form>
         </PortalCard>
+
+        <section className="rounded-2xl border border-destructive/30 bg-red-50/60 p-5 shadow-sm sm:p-6">
+          <div className="mb-4 flex items-start gap-3">
+            <FaExclamationTriangle className="mt-1 shrink-0 text-destructive" />
+            <div>
+              <h2 className="text-lg font-semibold text-destructive">Delete account</h2>
+              <p className="mt-1 text-sm text-red-800/80">
+                Permanently delete your profile and all related data. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          {!showDeleteWarning ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+              onClick={() => setShowDeleteWarning(true)}
+            >
+              I want to delete my account
+            </Button>
+          ) : (
+            <div className="space-y-4">
+              <div
+                role="alert"
+                className="rounded-xl border border-destructive/40 bg-white px-4 py-3 text-sm text-red-900"
+              >
+                <p className="font-semibold">Warning before you continue</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>Your profile and login access will be removed forever.</li>
+                  <li>Applications, documents, payments, appointments, and messages will be deleted.</li>
+                  <li>You will need to register again if you want to use the portal later.</li>
+                </ul>
+              </div>
+
+              <form
+                className="grid max-w-xl gap-4"
+                onSubmit={deleteForm.handleSubmit(onDeleteAccount)}
+                noValidate
+              >
+                <FormField
+                  label='Type DELETE to confirm'
+                  required
+                  error={deleteForm.formState.errors.confirmation?.message}
+                >
+                  <Input placeholder="DELETE" {...deleteForm.register('confirmation')} />
+                </FormField>
+                <FormField
+                  label="Enter your password"
+                  required
+                  error={deleteForm.formState.errors.password?.message}
+                >
+                  <Input type="password" {...deleteForm.register('password')} />
+                </FormField>
+                {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="submit"
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                    disabled={deleteForm.formState.isSubmitting}
+                  >
+                    {deleteForm.formState.isSubmitting
+                      ? 'Deleting...'
+                      : 'Permanently delete my account'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowDeleteWarning(false)
+                      setDeleteError(null)
+                      deleteForm.reset()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+        </section>
       </div>
     </>
   )
