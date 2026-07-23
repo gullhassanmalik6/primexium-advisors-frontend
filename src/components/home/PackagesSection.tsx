@@ -137,7 +137,7 @@ export function WhyChooseUsSection() {
               ))}
             </div>
             <blockquote className="text-lg leading-relaxed text-foreground">
-              &ldquo;Primexium Consultants made my dream of studying in the UK come true. Their team
+              &ldquo;Primexium Advisors made my dream of studying in the UK come true. Their team
               guided me through every step — from university selection to visa approval.&rdquo;
             </blockquote>
             <div className="mt-6 flex items-center gap-4">

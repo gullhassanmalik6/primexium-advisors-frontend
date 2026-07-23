@@ -13,7 +13,7 @@ export default function CountriesPage() {
         <title>Study Destinations | {BRAND.name}</title>
         <meta
           name="description"
-          content="Explore study destinations including France, Italy, Germany, Finland, UK, and Canada with Primexium Consultants."
+          content="Explore study destinations including France, Italy, Germany, Finland, UK, and Canada with Primexium Advisors."
         />
       </Helmet>
 

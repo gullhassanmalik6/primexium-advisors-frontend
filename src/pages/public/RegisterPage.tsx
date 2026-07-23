@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { FormField } from '@/components/ui/label'
 import { useAuth } from '@/context/AuthContext'
 import { getErrorMessage } from '@/api/client'
@@ -122,8 +123,7 @@ export default function RegisterPage() {
               </FormField>
 
               <FormField label="Password" required error={errors.password?.message}>
-                <Input
-                  type="password"
+                <PasswordInput
                   autoComplete="new-password"
                   placeholder="At least 8 characters"
                   {...register('password')}
@@ -131,8 +131,7 @@ export default function RegisterPage() {
               </FormField>
 
               <FormField label="Confirm password" required error={errors.confirmPassword?.message}>
-                <Input
-                  type="password"
+                <PasswordInput
                   autoComplete="new-password"
                   placeholder="Repeat password"
                   {...register('confirmPassword')}

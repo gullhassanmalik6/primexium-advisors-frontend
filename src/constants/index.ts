@@ -1,7 +1,7 @@
 export const BRAND = {
-  name: 'Primexium Consultants',
+  name: 'Primexium Advisors',
   tagline: 'Connecting Dreams to Destinations',
-  email: 'info@primexiumconsultants.com',
+  email: 'info@primexiumadvisors.com',
   phone: '+92 300 0000000',
   whatsapp: '+923000000000',
   address: 'Lahore, Pakistan',

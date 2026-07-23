@@ -14,7 +14,7 @@ export default function SuccessStoriesPage() {
         <title>Success Stories | {BRAND.name}</title>
         <meta
           name="description"
-          content="Read success stories from students who achieved their study abroad dreams with Primexium Consultants."
+          content="Read success stories from students who achieved their study abroad dreams with Primexium Advisors."
         />
       </Helmet>
 

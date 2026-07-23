@@ -34,7 +34,7 @@ export function EligibilityResults({ formData, assessment, onStartOver }: Eligib
   }
 
   const whatsappMessage = encodeURIComponent(
-    `Hi Primexium Consultants, I completed the eligibility assessment. My name is ${formData.fullName}. I'd like to discuss my study abroad options.`,
+    `Hi Primexium Advisors, I completed the eligibility assessment. My name is ${formData.fullName}. I'd like to discuss my study abroad options.`,
   )
   const whatsappUrl = `https://wa.me/${BRAND.whatsapp.replace(/\D/g, '')}?text=${whatsappMessage}`
   const mailSubject = encodeURIComponent('Eligibility Assessment Follow-up')

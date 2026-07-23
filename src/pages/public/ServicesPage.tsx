@@ -29,7 +29,7 @@ export default function ServicesPage() {
         <title>Our Services | {BRAND.name}</title>
         <meta
           name="description"
-          content="Study abroad, student visa, admissions, scholarships, and SOP writing — complete support from Primexium Consultants."
+          content="Study abroad, student visa, admissions, scholarships, and SOP writing — complete support from Primexium Advisors."
         />
       </Helmet>
 

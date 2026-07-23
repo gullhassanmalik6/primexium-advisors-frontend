@@ -13,7 +13,7 @@ export default function UniversitiesPage() {
         <title>Universities | {BRAND.name}</title>
         <meta
           name="description"
-          content="Browse partner universities across Europe, the UK, and Canada with Primexium Consultants."
+          content="Browse partner universities across Europe, the UK, and Canada with Primexium Advisors."
         />
       </Helmet>
 

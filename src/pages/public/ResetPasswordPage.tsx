@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { FormField } from '@/components/ui/label'
 import { authApi } from '@/api/auth'
 import { getErrorMessage } from '@/api/client'
@@ -57,10 +57,10 @@ export default function ResetPasswordPage() {
             <p className="mt-2 text-sm text-muted-foreground">Choose a new password for your account.</p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
               <FormField label="New Password" required error={errors.newPassword?.message}>
-                <Input type="password" {...register('newPassword')} />
+                <PasswordInput autoComplete="new-password" {...register('newPassword')} />
               </FormField>
               <FormField label="Confirm Password" required error={errors.confirmPassword?.message}>
-                <Input type="password" {...register('confirmPassword')} />
+                <PasswordInput autoComplete="new-password" {...register('confirmPassword')} />
               </FormField>
               {serverError && <p className="text-sm text-destructive">{serverError}</p>}
               <Button type="submit" className="w-full" disabled={isSubmitting || !token}>

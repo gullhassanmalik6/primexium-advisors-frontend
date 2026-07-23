@@ -13,7 +13,7 @@ export default function AboutPage() {
         <title>About Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Learn about Primexium Consultants — our mission, values, and track record helping students study abroad."
+          content="Learn about Primexium Advisors — our mission, values, and track record helping students study abroad."
         />
       </Helmet>
 

@@ -7,6 +7,7 @@ import { EmptyState, PageIntro, PortalCard, StatusBadge } from '@/components/stu
 import { PageLoader } from '@/components/common/PageElements'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Select } from '@/components/ui/select'
 import { FormField } from '@/components/ui/label'
 import { getErrorMessage } from '@/api/client'
@@ -138,7 +139,7 @@ export default function AdminEmployeesPage() {
               <Input {...register('phone')} />
             </FormField>
             <FormField label="Password" required error={errors.password?.message}>
-              <Input type="password" {...register('password')} />
+              <PasswordInput autoComplete="new-password" {...register('password')} />
             </FormField>
             <FormField label="Role" required>
               <Select {...register('role')}>

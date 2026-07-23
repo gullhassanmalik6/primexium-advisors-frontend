@@ -13,7 +13,7 @@ export default function BlogPage() {
         <title>Blog | {BRAND.name}</title>
         <meta
           name="description"
-          content="Study abroad tips, visa guides, scholarships, and destination insights from Primexium Consultants."
+          content="Study abroad tips, visa guides, scholarships, and destination insights from Primexium Advisors."
         />
       </Helmet>
 

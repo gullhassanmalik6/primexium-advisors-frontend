@@ -14,7 +14,7 @@ export default function HomePage() {
         <title>{BRAND.name} | Study Abroad & Visa Experts</title>
         <meta
           name="description"
-          content="Primexium Consultants offers premium study abroad, student visa, university admission, and scholarship guidance services."
+          content="Primexium Advisors offers premium study abroad, student visa, university admission, and scholarship guidance services."
         />
       </Helmet>
 

@@ -58,7 +58,7 @@ export default function ContactPage() {
         <title>Contact Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Contact Primexium Consultants for study abroad counselling, visas, and admissions support."
+          content="Contact Primexium Advisors for study abroad counselling, visas, and admissions support."
         />
       </Helmet>
 

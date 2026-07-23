@@ -89,9 +89,9 @@ export const authApi = {
     return data.message
   },
 
-  deleteAccount: async (password: string, confirmation: string) => {
+  deleteAccount: async (confirmation: string) => {
     const { data } = await apiClient.delete<{ message: string }>('/auth/account', {
-      data: { password, confirmation },
+      data: { confirmation },
     })
     return data.message
   },

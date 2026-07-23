@@ -9,6 +9,7 @@ import { PageIntro, PortalCard } from '@/components/student/PortalUI'
 import { PageLoader } from '@/components/common/PageElements'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { FormField } from '@/components/ui/label'
 import { getErrorMessage } from '@/api/client'
 import { authApi } from '@/api/auth'
@@ -34,7 +35,6 @@ const passwordSchema = z
   })
 
 const deleteSchema = z.object({
-  password: z.string().min(1, 'Password is required'),
   confirmation: z
     .string()
     .refine((value) => value.trim().toUpperCase() === 'DELETE', {
@@ -75,7 +75,7 @@ export default function StudentProfilePage() {
 
   const deleteForm = useForm<DeleteFormValues>({
     resolver: zodResolver(deleteSchema),
-    defaultValues: { password: '', confirmation: '' },
+    defaultValues: { confirmation: '' },
   })
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function StudentProfilePage() {
     if (!confirmed) return
 
     try {
-      await authApi.deleteAccount(values.password, values.confirmation)
+      await authApi.deleteAccount(values.confirmation)
       logout()
       navigate(ROUTES.home, { replace: true })
     } catch (err) {
@@ -197,21 +197,30 @@ export default function StudentProfilePage() {
               required
               error={passwordForm.formState.errors.currentPassword?.message}
             >
-              <Input type="password" {...passwordForm.register('currentPassword')} />
+              <PasswordInput
+                autoComplete="current-password"
+                {...passwordForm.register('currentPassword')}
+              />
             </FormField>
             <FormField
               label="New Password"
               required
               error={passwordForm.formState.errors.newPassword?.message}
             >
-              <Input type="password" {...passwordForm.register('newPassword')} />
+              <PasswordInput
+                autoComplete="new-password"
+                {...passwordForm.register('newPassword')}
+              />
             </FormField>
             <FormField
               label="Confirm New Password"
               required
               error={passwordForm.formState.errors.confirmPassword?.message}
             >
-              <Input type="password" {...passwordForm.register('confirmPassword')} />
+              <PasswordInput
+                autoComplete="new-password"
+                {...passwordForm.register('confirmPassword')}
+              />
             </FormField>
             {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             {passwordSuccess && <p className="text-sm text-emerald-600">{passwordSuccess}</p>}
@@ -258,6 +267,7 @@ export default function StudentProfilePage() {
               <form
                 className="grid max-w-xl gap-4"
                 onSubmit={deleteForm.handleSubmit(onDeleteAccount)}
+                autoComplete="off"
                 noValidate
               >
                 <FormField
@@ -265,14 +275,14 @@ export default function StudentProfilePage() {
                   required
                   error={deleteForm.formState.errors.confirmation?.message}
                 >
-                  <Input placeholder="DELETE" {...deleteForm.register('confirmation')} />
-                </FormField>
-                <FormField
-                  label="Enter your password"
-                  required
-                  error={deleteForm.formState.errors.password?.message}
-                >
-                  <Input type="password" {...deleteForm.register('password')} />
+                  <Input
+                    placeholder="DELETE"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    {...deleteForm.register('confirmation')}
+                  />
                 </FormField>
                 {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
                 <div className="flex flex-wrap gap-3">

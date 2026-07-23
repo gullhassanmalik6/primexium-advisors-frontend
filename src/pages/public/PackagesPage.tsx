@@ -14,7 +14,7 @@ export default function PackagesPage() {
         <title>Packages & Pricing | {BRAND.name}</title>
         <meta
           name="description"
-          content="Flexible study abroad packages from Primexium Consultants — Basic, Premium, and Elite plans."
+          content="Flexible study abroad packages from Primexium Advisors — Basic, Premium, and Elite plans."
         />
       </Helmet>
 

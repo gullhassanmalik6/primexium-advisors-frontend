@@ -66,7 +66,7 @@ export default function BookConsultationPage() {
         <title>Book a Consultation | {BRAND.name}</title>
         <meta
           name="description"
-          content="Book a free study abroad consultation with Primexium Consultants counsellors."
+          content="Book a free study abroad consultation with Primexium Advisors counsellors."
         />
       </Helmet>
 
