@@ -30,23 +30,57 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Let the browser set multipart boundaries for FormData uploads.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
+
+let refreshPromise: Promise<string | null> | null = null
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = tokenStorage.getRefreshToken()
+  if (!refreshToken) return null
+
+  try {
+    const { data } = await axios.post<{
+      access_token: string
+      refresh_token: string
+    }>(`${API_BASE_URL}/auth/refresh`, { refresh_token: refreshToken })
+    tokenStorage.setTokens(data.access_token, data.refresh_token)
+    return data.access_token
+  } catch {
+    tokenStorage.clearTokens()
+    return null
+  }
+}
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      const url = error.config?.url ?? ''
-      const isAuthAttempt =
-        url.includes('/auth/login') || url.includes('/auth/register')
-      if (!isAuthAttempt) {
-        tokenStorage.clearTokens()
-        if (!window.location.pathname.startsWith('/login')) {
-          window.location.href = '/login'
-        }
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+    const url = originalRequest?.url ?? ''
+    const isAuthAttempt =
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/refresh')
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthAttempt) {
+      originalRequest._retry = true
+      refreshPromise ??= refreshAccessToken().finally(() => {
+        refreshPromise = null
+      })
+      const newToken = await refreshPromise
+      if (newToken) {
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return apiClient(originalRequest)
+      }
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
       }
     }
+
     return Promise.reject(error)
   },
 )

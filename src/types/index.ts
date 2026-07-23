@@ -14,6 +14,7 @@ export interface User {
   role: UserRole
   isActive: boolean
   avatarUrl?: string
+  phone?: string
   createdAt: string
 }
 

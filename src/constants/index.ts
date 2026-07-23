@@ -32,6 +32,8 @@ export const ROUTES = {
   eligibilityChecker: '/eligibility-checker',
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
   student: {
     dashboard: '/student/dashboard',
     applications: '/student/applications',
@@ -53,6 +55,8 @@ export const ROUTES = {
     packages: '/admin/packages',
     payments: '/admin/payments',
     documents: '/admin/documents',
+    appointments: '/admin/appointments',
+    messages: '/admin/messages',
     blog: '/admin/blog',
     testimonials: '/admin/testimonials',
     reports: '/admin/reports',

@@ -114,7 +114,13 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="mt-4 text-center text-sm">
+              <Link to={ROUTES.forgotPassword} className="font-medium text-secondary hover:underline">
+                Forgot password?
+              </Link>
+            </p>
+
+            <p className="mt-4 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{' '}
               <Link to={ROUTES.register} className="font-semibold text-primary hover:underline">
                 Create one

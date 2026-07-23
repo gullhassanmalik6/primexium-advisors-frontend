@@ -12,6 +12,7 @@ interface UserResponse {
   email: string
   first_name: string
   last_name: string
+  phone?: string
   role: User['role']
   is_active: boolean
   avatar_url?: string
@@ -24,6 +25,7 @@ function mapUser(data: UserResponse): User {
     email: data.email,
     firstName: data.first_name,
     lastName: data.last_name,
+    phone: data.phone,
     role: data.role,
     isActive: data.is_active,
     avatarUrl: data.avatar_url,
@@ -61,6 +63,30 @@ export const authApi = {
   getMe: async () => {
     const { data } = await apiClient.get<UserResponse>('/auth/me')
     return mapUser(data)
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const { data } = await apiClient.post<{ message: string }>('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    })
+    return data.message
+  },
+
+  forgotPassword: async (email: string) => {
+    const { data } = await apiClient.post<{ message: string; reset_url?: string }>(
+      '/auth/forgot-password',
+      { email },
+    )
+    return data
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    const { data } = await apiClient.post<{ message: string }>('/auth/reset-password', {
+      token,
+      new_password: newPassword,
+    })
+    return data.message
   },
 
   logout: () => {

@@ -29,7 +29,7 @@ import { eligibilityFormSchema, type EligibilityFormValues } from '@/schemas/eli
 import type { EligibilityFormData } from '@/types/eligibility'
 
 interface EligibilityFormProps {
-  onSubmit: (data: EligibilityFormData) => void
+  onSubmit: (data: EligibilityFormData) => void | Promise<void>
 }
 
 export function EligibilityForm({ onSubmit }: EligibilityFormProps) {
@@ -48,8 +48,8 @@ export function EligibilityForm({ onSubmit }: EligibilityFormProps) {
   const englishTest = watch('englishTest')
   const showEnglishScore = englishTest !== 'moi' && englishTest !== 'not_available'
 
-  const submit = (values: EligibilityFormValues) => {
-    onSubmit(values as EligibilityFormData)
+  const submit = async (values: EligibilityFormValues) => {
+    await onSubmit(values as EligibilityFormData)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

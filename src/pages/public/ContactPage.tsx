@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
 import { FaEnvelope, FaMapMarkerAlt, FaPhone, FaWhatsapp } from 'react-icons/fa'
+import { PageHero } from '@/components/common/PageHero'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,7 +14,7 @@ import { leadsApi } from '@/api/leads'
 import { BRAND, ROUTES } from '@/constants'
 import { contactFormSchema, type ContactFormValues } from '@/schemas/leads'
 
-export function ContactSection() {
+export default function ContactPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -52,21 +53,29 @@ export function ContactSection() {
   }
 
   return (
-    <section className="section-padding bg-primary text-white">
-      <div className="container-wide">
+    <>
+      <Helmet>
+        <title>Contact Us | {BRAND.name}</title>
+        <meta
+          name="description"
+          content="Contact Primexium Consultants for study abroad counselling, visas, and admissions support."
+        />
+      </Helmet>
+
+      <PageHero
+        eyebrow="Contact"
+        title="Get in Touch"
+        description="Send us a message or book a free consultation with our expert counsellors."
+      />
+
+      <section className="container-wide section-padding">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <p className="mb-3 text-sm font-medium uppercase tracking-widest text-secondary">
-              Contact Us
+            <h2 className="text-2xl font-semibold text-primary">Contact Details</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Our team typically responds within one business day.
             </p>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Ready to Start Your Journey?
-            </h2>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">
-              Get in touch with our expert counsellors for a free consultation.
-            </p>
-
-            <div className="mt-8 space-y-6">
+            <div className="mt-8 space-y-5">
               {[
                 { icon: FaPhone, label: 'Phone', value: BRAND.phone },
                 { icon: FaEnvelope, label: 'Email', value: BRAND.email },
@@ -74,42 +83,40 @@ export function ContactSection() {
                 { icon: FaWhatsapp, label: 'WhatsApp', value: BRAND.whatsapp },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                    <item.icon className="text-secondary" size={18} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <item.icon size={18} />
                   </div>
                   <div>
-                    <p className="text-sm text-white/60">{item.label}</p>
-                    <p className="font-medium">{item.value}</p>
+                    <p className="text-sm text-muted-foreground">{item.label}</p>
+                    <p className="font-medium text-foreground">{item.value}</p>
                   </div>
                 </div>
               ))}
             </div>
+            <Link to={ROUTES.bookConsultation} className="mt-8 inline-block">
+              <Button variant="outline">Prefer a consultation call?</Button>
+            </Link>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="rounded-2xl bg-white p-8 text-foreground shadow-2xl"
-          >
-            <h3 className="text-xl font-semibold text-primary">Send us a Message</h3>
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+            <h2 className="text-xl font-semibold text-primary">Send us a Message</h2>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label="Your Name" required error={errors.fullName?.message}>
-                  <Input placeholder="Your Name" {...register('fullName')} />
+                <FormField label="Full Name" required error={errors.fullName?.message}>
+                  <Input placeholder="Your name" {...register('fullName')} />
                 </FormField>
                 <FormField label="Email" required error={errors.email?.message}>
-                  <Input type="email" placeholder="Email Address" {...register('email')} />
+                  <Input type="email" placeholder="you@example.com" {...register('email')} />
                 </FormField>
               </div>
               <FormField label="Phone" error={errors.phone?.message}>
-                <Input placeholder="Phone Number" {...register('phone')} />
+                <Input placeholder="+92 300 0000000" {...register('phone')} />
               </FormField>
               <FormField label="Subject" required error={errors.subject?.message}>
-                <Input placeholder="Subject" {...register('subject')} />
+                <Input placeholder="How can we help?" {...register('subject')} />
               </FormField>
               <FormField label="Message" required error={errors.message?.message}>
-                <Textarea placeholder="Your Message" {...register('message')} />
+                <Textarea placeholder="Tell us about your goals..." {...register('message')} />
               </FormField>
               {serverError && <p className="text-sm text-destructive">{serverError}</p>}
               {successMessage && <p className="text-sm text-emerald-600">{successMessage}</p>}
@@ -117,18 +124,9 @@ export function ContactSection() {
                 {isSubmitting ? 'Sending...' : 'Send Message'}
               </Button>
             </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Or{' '}
-              <Link
-                to={ROUTES.bookConsultation}
-                className="font-medium text-secondary hover:underline"
-              >
-                book a free consultation
-              </Link>
-            </p>
-          </motion.div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
