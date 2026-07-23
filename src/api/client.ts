@@ -37,8 +37,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
-      tokenStorage.clearTokens()
-      window.location.href = '/login'
+      const url = error.config?.url ?? ''
+      const isAuthAttempt =
+        url.includes('/auth/login') || url.includes('/auth/register')
+      if (!isAuthAttempt) {
+        tokenStorage.clearTokens()
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login'
+        }
+      }
     }
     return Promise.reject(error)
   },
@@ -46,8 +53,21 @@ apiClient.interceptors.response.use(
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as { detail?: string } | undefined
-    return data?.detail ?? error.message
+    const detail = (error.response?.data as { detail?: unknown } | undefined)?.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((item) => {
+          if (typeof item === 'string') return item
+          if (item && typeof item === 'object' && 'msg' in item) {
+            return String((item as { msg: unknown }).msg)
+          }
+          return null
+        })
+        .filter(Boolean)
+      if (messages.length) return messages.join('. ')
+    }
+    return error.message
   }
   if (error instanceof Error) return error.message
   return 'An unexpected error occurred'

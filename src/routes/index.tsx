@@ -1,12 +1,15 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PageLoader } from '@/components/common/PageElements'
+import { AppShellLayout } from '@/layouts/AppShellLayout'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { ROUTES, USER_ROLES } from '@/constants'
 
 const HomePage = lazy(() => import('@/pages/public/HomePage'))
 const EligibilityCheckerPage = lazy(() => import('@/pages/public/EligibilityCheckerPage'))
+const LoginPage = lazy(() => import('@/pages/public/LoginPage'))
+const RegisterPage = lazy(() => import('@/pages/public/RegisterPage'))
 const PlaceholderPageComponent = lazy(() => import('@/pages/public/PlaceholderPage'))
 
 function LazyPlaceholder({ title, description }: { title: string; description?: string }) {
@@ -35,8 +38,6 @@ const BlogPage = withTitle('Blog')
 const FAQsPage = withTitle('FAQs')
 const ContactPage = withTitle('Contact Us')
 const BookConsultationPage = withTitle('Book a Consultation')
-const LoginPage = withTitle('Login')
-const RegisterPage = withTitle('Register')
 
 const ADMIN_ROLES: Array<(typeof USER_ROLES)[keyof typeof USER_ROLES]> = [
   USER_ROLES.ADMIN,
@@ -81,30 +82,59 @@ export const router = createBrowserRouter([
           </LazyPage>
         ),
       },
-      { path: ROUTES.login.slice(1), element: <LazyPage><LoginPage /></LazyPage> },
-      { path: ROUTES.register.slice(1), element: <LazyPage><RegisterPage /></LazyPage> },
+      {
+        path: ROUTES.login.slice(1),
+        element: (
+          <LazyPage>
+            <LoginPage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: ROUTES.register.slice(1),
+        element: (
+          <LazyPage>
+            <RegisterPage />
+          </LazyPage>
+        ),
+      },
     ],
   },
   {
     path: '/student',
     element: (
       <ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
-        <LazyPlaceholder title="Student Portal" description="Student dashboard coming soon." />
+        <AppShellLayout />
       </ProtectedRoute>
     ),
     children: [
       { index: true, element: <Navigate to={ROUTES.student.dashboard} replace /> },
+      {
+        path: 'dashboard',
+        element: (
+          <LazyPlaceholder
+            title="Student Portal"
+            description="Student dashboard coming soon."
+          />
+        ),
+      },
     ],
   },
   {
     path: '/admin',
     element: (
       <ProtectedRoute allowedRoles={ADMIN_ROLES}>
-        <LazyPlaceholder title="Admin Portal" description="Admin dashboard coming soon." />
+        <AppShellLayout />
       </ProtectedRoute>
     ),
     children: [
       { index: true, element: <Navigate to={ROUTES.admin.dashboard} replace /> },
+      {
+        path: 'dashboard',
+        element: (
+          <LazyPlaceholder title="Admin Portal" description="Admin dashboard coming soon." />
+        ),
+      },
     ],
   },
   {

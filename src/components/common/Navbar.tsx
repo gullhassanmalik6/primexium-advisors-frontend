@@ -1,14 +1,26 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { HiMenuAlt3, HiX } from 'react-icons/hi'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/common/Logo'
-import { NAV_LINKS, ROUTES } from '@/constants'
+import { useAuth } from '@/context/AuthContext'
+import { NAV_LINKS, ROUTES, USER_ROLES } from '@/constants'
 import { cn } from '@/utils/cn'
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const portalHref =
+    user?.role === USER_ROLES.STUDENT ? ROUTES.student.dashboard : ROUTES.admin.dashboard
+
+  const handleLogout = () => {
+    logout()
+    setIsOpen(false)
+    navigate(ROUTES.home)
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -39,12 +51,29 @@ export function Navbar() {
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
-            <Link to={ROUTES.login}>
-              <Button variant="ghost" size="sm">Login</Button>
-            </Link>
-            <Link to={ROUTES.bookConsultation}>
-              <Button size="sm">Book Consultation</Button>
-            </Link>
+            {isAuthenticated && user ? (
+              <>
+                <Link to={portalHref}>
+                  <Button variant="ghost" size="sm">
+                    {user.firstName}
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to={ROUTES.login}>
+                  <Button variant="ghost" size="sm">
+                    Login
+                  </Button>
+                </Link>
+                <Link to={ROUTES.register}>
+                  <Button size="sm">Register</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -83,12 +112,29 @@ export function Navbar() {
                   </NavLink>
                 ))}
                 <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-                  <Link to={ROUTES.login} onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full">Login</Button>
-                  </Link>
-                  <Link to={ROUTES.bookConsultation} onClick={() => setIsOpen(false)}>
-                    <Button className="w-full">Book Consultation</Button>
-                  </Link>
+                  {isAuthenticated && user ? (
+                    <>
+                      <Link to={portalHref} onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full">
+                          {user.firstName}&apos;s portal
+                        </Button>
+                      </Link>
+                      <Button className="w-full" onClick={handleLogout}>
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to={ROUTES.login} onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full">
+                          Login
+                        </Button>
+                      </Link>
+                      <Link to={ROUTES.register} onClick={() => setIsOpen(false)}>
+                        <Button className="w-full">Register</Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
