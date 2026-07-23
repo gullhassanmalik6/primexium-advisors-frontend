@@ -34,8 +34,8 @@ export function Footer() {
               <Logo variant="footer" linkToHome />
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
-              {BRAND.tagline}. An international education consultancy operating from Paris, France
-              and Karachi, Pakistan.
+              {BRAND.tagline}. An international education consultancy operating from Karachi, Pakistan
+              and Paris, France.
             </p>
             <div className="mt-6 flex gap-3">
               {[FaFacebookF, FaInstagram, FaLinkedinIn, FaWhatsapp].map((Icon, i) => (

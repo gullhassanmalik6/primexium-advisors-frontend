@@ -1,21 +1,21 @@
 export const OFFICES = [
   {
-    id: 'paris',
-    flag: '🇫🇷',
-    label: 'Head Office',
-    city: 'Paris, France',
-    phone: '+33 7 67 63 89 47',
-    email: 'info@primexiumadvisors.com',
-    mapLabel: 'Paris, France',
-  },
-  {
     id: 'karachi',
     flag: '🇵🇰',
-    label: 'Regional Office',
+    label: 'Head Office',
     city: 'Karachi, Sindh, Pakistan',
     phone: '+92 329 2595900',
     email: 'info@primexiumadvisors.com',
     mapLabel: 'Karachi, Sindh, Pakistan',
+  },
+  {
+    id: 'paris',
+    flag: '🇫🇷',
+    label: 'Regional Office',
+    city: 'Paris, France',
+    phone: '+33 7 67 63 89 47',
+    email: 'info@primexiumadvisors.com',
+    mapLabel: 'Paris, France',
   },
 ] as const
 
@@ -23,9 +23,9 @@ export const BRAND = {
   name: 'Primexium Advisors',
   tagline: 'Connecting Dreams to Destinations',
   email: 'info@primexiumadvisors.com',
-  phone: '+33 7 67 63 89 47',
+  phone: '+92 329 2595900',
   whatsapp: '+923292595900',
-  address: 'Paris, France · Karachi, Pakistan',
+  address: 'Karachi, Pakistan · Paris, France',
   offices: OFFICES,
 } as const
 

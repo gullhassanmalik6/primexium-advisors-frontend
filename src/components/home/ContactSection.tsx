@@ -64,7 +64,7 @@ export function ContactSection() {
               Ready to Start Your Journey?
             </h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">
-              Get in touch with our international counsellors in Paris and Karachi for a free
+              Get in touch with our international counsellors in Karachi and Paris for a free
               consultation.
             </p>
 

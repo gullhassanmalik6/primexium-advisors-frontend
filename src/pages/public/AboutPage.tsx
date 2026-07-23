@@ -13,14 +13,14 @@ export default function AboutPage() {
         <title>About Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Learn about Primexium Advisors — an international education consultancy operating from Paris, France and Karachi, Pakistan."
+          content="Learn about Primexium Advisors — an international education consultancy operating from Karachi, Pakistan and Paris, France."
         />
       </Helmet>
 
       <PageHero
         eyebrow="About Us"
         title={`Who We Are at ${BRAND.name}`}
-        description="We are an international education consultancy operating from Paris, France and Karachi, Pakistan — connecting ambitious students with the right universities, countries, and career pathways."
+        description="We are an international education consultancy operating from Karachi, Pakistan and Paris, France — connecting ambitious students with the right universities, countries, and career pathways."
       />
 
       <section className="container-wide section-padding">
@@ -28,7 +28,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-semibold text-primary sm:text-3xl">Our Mission</h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
             {BRAND.tagline}. {BRAND.name} is an international education consultancy with a Head
-            Office in Paris, France and a Regional Office in Karachi, Pakistan. We believe
+            Office in Karachi, Pakistan and a Regional Office in Paris, France. We believe
             international education should feel clear, achievable, and personal — not overwhelming.
             From the first eligibility check to visa approval, our counsellors guide students across
             borders with transparency and care.

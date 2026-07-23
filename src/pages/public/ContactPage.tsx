@@ -59,14 +59,14 @@ export default function ContactPage() {
         <title>Contact Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Contact Primexium Advisors in Paris, France and Karachi, Pakistan for study abroad counselling, visas, and admissions support."
+          content="Contact Primexium Advisors in Karachi, Pakistan and Paris, France for study abroad counselling, visas, and admissions support."
         />
       </Helmet>
 
       <PageHero
         eyebrow="Contact"
         title="Get in Touch"
-        description="Reach our international team in Paris and Karachi, or send a message for a free consultation."
+        description="Reach our international team in Karachi and Paris, or send a message for a free consultation."
       />
 
       <section className="container-wide section-padding">
@@ -109,7 +109,7 @@ export default function ContactPage() {
               <h2 className="text-2xl font-semibold text-primary">Send us a Message</h2>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Tell us about your study goals and preferred destination. We will connect you with
-                the right counsellor from our Paris or Karachi office.
+                the right counsellor from our Karachi or Paris office.
               </p>
               <Link to={ROUTES.bookConsultation} className="mt-6 inline-block">
                 <Button variant="outline">Prefer a consultation call?</Button>
