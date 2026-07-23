@@ -13,23 +13,25 @@ export default function AboutPage() {
         <title>About Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Learn about Primexium Advisors — our mission, values, and track record helping students study abroad."
+          content="Learn about Primexium Advisors — an international education consultancy operating from Paris, France and Karachi, Pakistan."
         />
       </Helmet>
 
       <PageHero
         eyebrow="About Us"
         title={`Who We Are at ${BRAND.name}`}
-        description="We connect ambitious students with the right universities, countries, and career pathways through honest counselling and end-to-end support."
+        description="We are an international education consultancy operating from Paris, France and Karachi, Pakistan — connecting ambitious students with the right universities, countries, and career pathways."
       />
 
       <section className="container-wide section-padding">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold text-primary sm:text-3xl">Our Mission</h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            {BRAND.tagline}. We believe international education should feel clear, achievable, and
-            personal — not overwhelming. From the first eligibility check to visa approval, our
-            counsellors guide students with transparency and care.
+            {BRAND.tagline}. {BRAND.name} is an international education consultancy with a Head
+            Office in Paris, France and a Regional Office in Karachi, Pakistan. We believe
+            international education should feel clear, achievable, and personal — not overwhelming.
+            From the first eligibility check to visa approval, our counsellors guide students across
+            borders with transparency and care.
           </p>
         </div>
 

@@ -3,20 +3,20 @@
 @theme {
   --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #0b1f4d;
+  --color-primary: #102a66;
   --color-primary-foreground: #ffffff;
   --color-secondary: #d4af37;
-  --color-secondary-foreground: #0b1f4d;
+  --color-secondary-foreground: #102a66;
   --color-background: #ffffff;
   --color-foreground: #111827;
   --color-muted: #f8fafc;
   --color-muted-foreground: #64748b;
   --color-border: #e2e8f0;
-  --color-ring: #0b1f4d;
+  --color-ring: #102a66;
   --color-card: #ffffff;
   --color-card-foreground: #111827;
   --color-accent: #f1f5f9;
-  --color-accent-foreground: #0b1f4d;
+  --color-accent-foreground: #102a66;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 

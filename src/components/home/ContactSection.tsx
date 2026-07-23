@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { FaEnvelope, FaMapMarkerAlt, FaPhone, FaWhatsapp } from 'react-icons/fa'
+import { FaEnvelope, FaWhatsapp } from 'react-icons/fa'
+import { OfficeCards } from '@/components/common/OfficeCards'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -63,26 +64,31 @@ export function ContactSection() {
               Ready to Start Your Journey?
             </h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">
-              Get in touch with our expert counsellors for a free consultation.
+              Get in touch with our international counsellors in Paris and Karachi for a free
+              consultation.
             </p>
 
-            <div className="mt-8 space-y-6">
-              {[
-                { icon: FaPhone, label: 'Phone', value: BRAND.phone },
-                { icon: FaEnvelope, label: 'Email', value: BRAND.email },
-                { icon: FaMapMarkerAlt, label: 'Address', value: BRAND.address },
-                { icon: FaWhatsapp, label: 'WhatsApp', value: BRAND.whatsapp },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                    <item.icon className="text-secondary" size={18} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-white/60">{item.label}</p>
-                    <p className="font-medium">{item.value}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="mt-8">
+              <OfficeCards variant="dark" showMaps={false} />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={`mailto:${BRAND.email}`}
+                className="inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-secondary"
+              >
+                <FaEnvelope className="text-secondary" />
+                {BRAND.email}
+              </a>
+              <a
+                href={`https://wa.me/${BRAND.whatsapp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-secondary"
+              >
+                <FaWhatsapp className="text-secondary" />
+                WhatsApp
+              </a>
             </div>
           </div>
 

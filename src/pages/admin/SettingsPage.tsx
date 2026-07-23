@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { PageIntro, PortalCard } from '@/components/student/PortalUI'
-import { BRAND } from '@/constants'
+import { BRAND, OFFICES } from '@/constants'
 
 export default function AdminSettingsPage() {
   return (
@@ -28,23 +28,28 @@ export default function AdminSettingsPage() {
               <dd className="font-medium text-primary">{BRAND.email}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Phone</dt>
+              <dt className="text-muted-foreground">Primary phone</dt>
               <dd className="font-medium text-primary">{BRAND.phone}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Address</dt>
+              <dt className="text-muted-foreground">Presence</dt>
               <dd className="font-medium text-primary">{BRAND.address}</dd>
             </div>
           </dl>
         </PortalCard>
-        <PortalCard title="Notes">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Brand and marketing content are currently managed in frontend constants
-            (<code className="mx-1 rounded bg-muted px-1">constants/index.ts</code>
-            and
-            <code className="mx-1 rounded bg-muted px-1">constants/content.ts</code>.
-            A full CMS database layer can be added later for in-app editing.
-          </p>
+        <PortalCard title="Offices">
+          <ul className="space-y-4 text-sm">
+            {OFFICES.map((office) => (
+              <li key={office.id} className="rounded-xl border border-border p-4">
+                <p className="font-semibold text-primary">
+                  {office.flag} {office.label}
+                </p>
+                <p className="mt-1 text-muted-foreground">{office.city}</p>
+                <p className="mt-2 text-foreground">{office.phone}</p>
+                <p className="text-foreground">{office.email}</p>
+              </li>
+            ))}
+          </ul>
         </PortalCard>
       </div>
     </>

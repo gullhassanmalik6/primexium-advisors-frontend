@@ -56,7 +56,7 @@ export default function LoginPage() {
         <title>Login | {BRAND.name}</title>
       </Helmet>
 
-      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden bg-gradient-to-br from-primary via-[#0B1F4D] to-[#152a5c]">
+      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden bg-gradient-to-br from-primary via-[#102A66] to-[#1a3a7a]">
         <div
           className="pointer-events-none absolute inset-0 opacity-30"
           style={{

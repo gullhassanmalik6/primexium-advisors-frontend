@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
       <Helmet>
         <title>Forgot Password | {BRAND.name}</title>
       </Helmet>
-      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden bg-gradient-to-br from-primary via-[#0B1F4D] to-[#152a5c]">
+      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden bg-gradient-to-br from-primary via-[#102A66] to-[#1a3a7a]">
         <div className="container-wide flex min-h-[calc(100vh-6rem)] items-center justify-center py-16">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
