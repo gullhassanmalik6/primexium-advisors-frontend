@@ -154,50 +154,8 @@ export const TESTIMONIALS = [
   },
 ] as const
 
-export const BLOG_POSTS = [
-  {
-    title: 'Top Universities in France for Pakistani Students',
-    excerpt: 'Explore affordable French universities, intake timelines, and visa essentials.',
-    date: 'Jun 12, 2026',
-    slug: 'france-universities-pakistani-students',
-    category: 'Destinations',
-  },
-  {
-    title: 'Complete Guide to Student Visa for Germany',
-    excerpt: 'Blocked account, APS, language requirements, and document checklist explained.',
-    date: 'May 28, 2026',
-    slug: 'germany-student-visa-guide',
-    category: 'Visas',
-  },
-  {
-    title: 'How to Write a Winning Statement of Purpose',
-    excerpt: 'Expert tips to craft an SOP that gets you admitted to your dream university.',
-    date: 'May 10, 2026',
-    slug: 'winning-sop-guide',
-    category: 'Applications',
-  },
-  {
-    title: 'IELTS vs MOI: What Do European Universities Accept?',
-    excerpt: 'Understand when Medium of Instruction letters work and when IELTS is mandatory.',
-    date: 'Apr 22, 2026',
-    slug: 'ielts-vs-moi-europe',
-    category: 'Language',
-  },
-  {
-    title: 'Scholarships for Master’s Programs in Italy',
-    excerpt: 'Regional scholarships, DSU, and university waivers that reduce your study costs.',
-    date: 'Apr 5, 2026',
-    slug: 'italy-masters-scholarships',
-    category: 'Scholarships',
-  },
-  {
-    title: 'September vs January Intake: Which Should You Choose?',
-    excerpt: 'Compare deadlines, competition, and program availability across major intakes.',
-    date: 'Mar 18, 2026',
-    slug: 'september-vs-january-intake',
-    category: 'Planning',
-  },
-] as const
+export { BLOG_POSTS, getBlogPostBySlug } from '@/constants/blog'
+export type { BlogPost, BlogSection } from '@/constants/blog'
 
 export const FAQS = [
   {

@@ -15,6 +15,7 @@ const UniversitiesPage = lazy(() => import('@/pages/public/UniversitiesPage'))
 const PackagesPage = lazy(() => import('@/pages/public/PackagesPage'))
 const SuccessStoriesPage = lazy(() => import('@/pages/public/SuccessStoriesPage'))
 const BlogPage = lazy(() => import('@/pages/public/BlogPage'))
+const BlogPostPage = lazy(() => import('@/pages/public/BlogPostPage'))
 const FAQsPage = lazy(() => import('@/pages/public/FAQsPage'))
 const ContactPage = lazy(() => import('@/pages/public/ContactPage'))
 const BookConsultationPage = lazy(() => import('@/pages/public/BookConsultationPage'))
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.packages.slice(1), element: <LazyPage><PackagesPage /></LazyPage> },
       { path: ROUTES.successStories.slice(1), element: <LazyPage><SuccessStoriesPage /></LazyPage> },
       { path: ROUTES.blog.slice(1), element: <LazyPage><BlogPage /></LazyPage> },
+      { path: 'blog/:slug', element: <LazyPage><BlogPostPage /></LazyPage> },
       { path: ROUTES.faqs.slice(1), element: <LazyPage><FAQsPage /></LazyPage> },
       { path: ROUTES.contact.slice(1), element: <LazyPage><ContactPage /></LazyPage> },
       {

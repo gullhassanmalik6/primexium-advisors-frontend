@@ -3,52 +3,12 @@ import { motion } from 'framer-motion'
 import { FaStar } from 'react-icons/fa'
 import { SectionHeading } from '@/components/common/PageElements'
 import { Button } from '@/components/ui/button'
+import { TESTIMONIALS } from '@/constants/content'
+import { BLOG_POSTS } from '@/constants/blog'
 import { ROUTES } from '@/constants'
 
-const TESTIMONIALS = [
-  {
-    name: 'Sara Ahmed',
-    university: 'University of Toronto',
-    country: 'Canada',
-    content: 'Outstanding service! They helped me secure a scholarship and guided me through the entire visa process seamlessly.',
-    rating: 5,
-  },
-  {
-    name: 'Hassan Ali',
-    university: 'Monash University',
-    country: 'Australia',
-    content: 'Professional, knowledgeable, and always available. I highly recommend Primexium for anyone planning to study abroad.',
-    rating: 5,
-  },
-  {
-    name: 'Fatima Noor',
-    university: 'TU Munich',
-    country: 'Germany',
-    content: 'Their SOP writing service was exceptional. I received my admission letter within weeks of applying.',
-    rating: 5,
-  },
-]
-
-const BLOG_POSTS = [
-  {
-    title: 'Top 10 Universities in UK for 2026',
-    excerpt: 'Discover the best universities in the United Kingdom for international students.',
-    date: 'Mar 15, 2026',
-    slug: 'top-universities-uk-2026',
-  },
-  {
-    title: 'Complete Guide to Student Visa for Canada',
-    excerpt: 'Everything you need to know about applying for a Canadian student visa.',
-    date: 'Mar 10, 2026',
-    slug: 'canada-student-visa-guide',
-  },
-  {
-    title: 'How to Write a Winning Statement of Purpose',
-    excerpt: 'Expert tips to craft an SOP that gets you admitted to your dream university.',
-    date: 'Mar 5, 2026',
-    slug: 'winning-sop-guide',
-  },
-]
+const HOME_TESTIMONIALS = TESTIMONIALS.slice(0, 3)
+const HOME_BLOG_POSTS = BLOG_POSTS.slice(0, 3)
 
 export function TestimonialsSection() {
   return (
@@ -61,7 +21,7 @@ export function TestimonialsSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-3">
-          {TESTIMONIALS.map((item, index) => (
+          {HOME_TESTIMONIALS.map((item, index) => (
             <motion.div
               key={item.name}
               initial={{ opacity: 0, y: 20 }}
@@ -101,7 +61,7 @@ export function BlogSection() {
         />
 
         <div className="grid gap-6 md:grid-cols-3">
-          {BLOG_POSTS.map((post, index) => (
+          {HOME_BLOG_POSTS.map((post, index) => (
             <motion.article
               key={post.slug}
               initial={{ opacity: 0, y: 20 }}
@@ -115,7 +75,10 @@ export function BlogSection() {
               >
                 <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary/20" />
                 <div className="p-6">
-                  <time className="text-xs text-muted-foreground">{post.date}</time>
+                  <p className="text-xs font-medium uppercase tracking-widest text-secondary">
+                    {post.category}
+                  </p>
+                  <time className="mt-2 block text-xs text-muted-foreground">{post.date}</time>
                   <h3 className="mt-2 font-semibold text-primary group-hover:text-secondary">
                     {post.title}
                   </h3>
