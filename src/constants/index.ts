@@ -4,18 +4,23 @@ export const OFFICES = [
     flag: '🇵🇰',
     label: 'Head Office',
     city: 'Karachi, Sindh, Pakistan',
+    address: 'Karachi, Sindh, Pakistan',
     phone: '+92 329 2595900',
     email: 'info@primexiumadvisors.com',
     mapLabel: 'Karachi, Sindh, Pakistan',
+    mapEmbedUrl:
+      'https://www.google.com/maps?q=Karachi%2C%20Sindh%2C%20Pakistan&output=embed',
   },
   {
     id: 'paris',
     flag: '🇫🇷',
     label: 'Regional Office',
     city: 'Paris, France',
+    address: 'Paris, France',
     phone: '+33 7 67 63 89 47',
     email: 'info@primexiumadvisors.com',
     mapLabel: 'Paris, France',
+    mapEmbedUrl: 'https://www.google.com/maps?q=Paris%2C%20France&output=embed',
   },
 ] as const
 
@@ -69,8 +74,9 @@ export const ROUTES = {
   admin: {
     dashboard: '/admin/dashboard',
     leads: '/admin/leads',
-    students: '/admin/students',
-    applications: '/admin/applications',
+  students: '/admin/students',
+  studentDetail: '/admin/students/:id',
+  applications: '/admin/applications',
     employees: '/admin/employees',
     universities: '/admin/universities',
     countries: '/admin/countries',

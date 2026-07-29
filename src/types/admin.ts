@@ -49,6 +49,30 @@ export interface AdminStudent extends User {
   applicationsCount: number
 }
 
+export interface AdminStudentDetail {
+  student: AdminStudent
+  applications: StudentApplication[]
+  documents: StudentDocument[]
+  payments: StudentPayment[]
+  appointments: StudentAppointment[]
+  messages: StudentMessage[]
+}
+
+export interface CrmOverview {
+  stats: AdminDashboardStats
+  recentLeads: AdminLead[]
+  leadsByStatus: Record<string, number>
+}
+
+export interface LeadConvertResult {
+  lead: AdminLead
+  studentId: string
+  studentEmail: string
+  temporaryPassword?: string
+  createdNewStudent: boolean
+  message: string
+}
+
 export interface AdminApplication extends StudentApplication {
   studentEmail: string
   studentName: string

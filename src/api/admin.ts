@@ -9,7 +9,9 @@ import type {
   AdminMessage,
   AdminPayment,
   AdminStudent,
+  CrmOverview,
   EmployeeCreatePayload,
+  LeadConvertResult,
   LeadStatus,
   PaymentCreatePayload,
   ReportSummary,
@@ -116,6 +118,29 @@ export const adminApi = {
     } satisfies AdminDashboardStats
   },
 
+  getCrmOverview: async () => {
+    const { data } = await apiClient.get<{
+      stats: DashboardResponse
+      recent_leads: LeadResponse[]
+      leads_by_status: Record<string, number>
+    }>('/admin/crm/overview')
+    return {
+      stats: {
+        leadsNew: data.stats.leads_new,
+        leadsTotal: data.stats.leads_total,
+        studentsTotal: data.stats.students_total,
+        applicationsTotal: data.stats.applications_total,
+        applicationsActive: data.stats.applications_active,
+        documentsPending: data.stats.documents_pending,
+        paymentsPending: data.stats.payments_pending,
+        appointmentsRequested: data.stats.appointments_requested,
+        messagesUnreadFromStudents: data.stats.messages_unread_from_students,
+      },
+      recentLeads: data.recent_leads.map(mapLead),
+      leadsByStatus: data.leads_by_status,
+    } satisfies CrmOverview
+  },
+
   getReportSummary: async () => {
     const { data } = await apiClient.get<{
       generated_at: string
@@ -152,6 +177,25 @@ export const adminApi = {
     return mapLead(data)
   },
 
+  convertLead: async (id: string) => {
+    const { data } = await apiClient.post<{
+      lead: LeadResponse
+      student_id: string
+      student_email: string
+      temporary_password?: string
+      created_new_student: boolean
+      message: string
+    }>(`/leads/${id}/convert`)
+    return {
+      lead: mapLead(data.lead),
+      studentId: data.student_id,
+      studentEmail: data.student_email,
+      temporaryPassword: data.temporary_password,
+      createdNewStudent: data.created_new_student,
+      message: data.message,
+    } satisfies LeadConvertResult
+  },
+
   listStudents: async () => {
     const { data } = await apiClient.get<UserResponse[]>('/admin/students')
     return data.map(
@@ -161,6 +205,141 @@ export const adminApi = {
           applicationsCount: item.applications_count ?? 0,
         }) satisfies AdminStudent,
     )
+  },
+
+  getStudentDetail: async (id: string) => {
+    const { data } = await apiClient.get<{
+      student: UserResponse
+      applications: Array<{
+        id: string
+        student_id: string
+        university_name: string
+        country: string
+        program_name: string
+        degree_level: string
+        intake: string
+        status: ApplicationStatus
+        notes?: string
+        created_at: string
+        updated_at: string
+      }>
+      documents: Array<{
+        id: string
+        student_id: string
+        application_id?: string
+        document_type: AdminDocument['documentType']
+        title: string
+        file_url?: string
+        status: DocumentStatus
+        notes?: string
+        created_at: string
+        updated_at: string
+      }>
+      payments: Array<{
+        id: string
+        student_id: string
+        application_id?: string
+        title: string
+        amount: string | number
+        currency: string
+        status: PaymentStatus
+        due_date?: string
+        paid_at?: string
+        notes?: string
+        created_at: string
+        updated_at: string
+      }>
+      appointments: Array<{
+        id: string
+        student_id: string
+        topic: string
+        preferred_date: string
+        preferred_time: string
+        meeting_mode: string
+        status: AppointmentStatus
+        notes?: string
+        created_at: string
+        updated_at: string
+      }>
+      messages: Array<{
+        id: string
+        student_id: string
+        sender_id: string
+        subject: string
+        body: string
+        status: AdminMessage['status']
+        is_from_student: boolean
+        created_at: string
+      }>
+    }>(`/admin/students/${id}`)
+
+    return {
+      student: {
+        ...mapUser(data.student),
+        applicationsCount: data.student.applications_count ?? data.applications.length,
+      },
+      applications: data.applications.map((item) => ({
+        id: item.id,
+        studentId: item.student_id,
+        universityName: item.university_name,
+        country: item.country,
+        programName: item.program_name,
+        degreeLevel: item.degree_level,
+        intake: item.intake,
+        status: item.status,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      })),
+      documents: data.documents.map((item) => ({
+        id: item.id,
+        studentId: item.student_id,
+        applicationId: item.application_id,
+        documentType: item.document_type,
+        title: item.title,
+        fileUrl: item.file_url,
+        status: item.status,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      })),
+      payments: data.payments.map((item) => ({
+        id: item.id,
+        studentId: item.student_id,
+        applicationId: item.application_id,
+        title: item.title,
+        amount: Number(item.amount),
+        currency: item.currency,
+        status: item.status,
+        dueDate: item.due_date,
+        paidAt: item.paid_at,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      })),
+      appointments: data.appointments.map((item) => ({
+        id: item.id,
+        studentId: item.student_id,
+        topic: item.topic,
+        preferredDate: item.preferred_date,
+        preferredTime: item.preferred_time,
+        meetingMode: item.meeting_mode,
+        status: item.status,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      })),
+      messages: data.messages.map((item) => ({
+        id: item.id,
+        studentId: item.student_id,
+        senderId: item.sender_id,
+        subject: item.subject,
+        body: item.body,
+        status: item.status,
+        isFromStudent: item.is_from_student,
+        createdAt: item.created_at,
+      })),
+    }
   },
 
   updateStudentStatus: async (id: string, isActive: boolean) => {

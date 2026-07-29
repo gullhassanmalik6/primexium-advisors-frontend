@@ -36,6 +36,7 @@ const StudentProfilePage = lazy(() => import('@/pages/student/ProfilePage'))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/DashboardPage'))
 const AdminLeadsPage = lazy(() => import('@/pages/admin/LeadsPage'))
 const AdminStudentsPage = lazy(() => import('@/pages/admin/StudentsPage'))
+const AdminStudentDetailPage = lazy(() => import('@/pages/admin/StudentDetailPage'))
 const AdminApplicationsPage = lazy(() => import('@/pages/admin/ApplicationsPage'))
 const AdminDocumentsPage = lazy(() => import('@/pages/admin/DocumentsPage'))
 const AdminPaymentsPage = lazy(() => import('@/pages/admin/PaymentsPage'))
@@ -136,6 +137,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <LazyPage><AdminDashboardPage /></LazyPage> },
       { path: 'leads', element: <LazyPage><AdminLeadsPage /></LazyPage> },
       { path: 'students', element: <LazyPage><AdminStudentsPage /></LazyPage> },
+      { path: 'students/:id', element: <LazyPage><AdminStudentDetailPage /></LazyPage> },
       { path: 'applications', element: <LazyPage><AdminApplicationsPage /></LazyPage> },
       { path: 'documents', element: <LazyPage><AdminDocumentsPage /></LazyPage> },
       { path: 'payments', element: <LazyPage><AdminPaymentsPage /></LazyPage> },

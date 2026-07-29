@@ -112,48 +112,21 @@ export function OfficeCards({
                   size={14}
                 />
                 <span className={cn('text-sm', isDark ? 'text-white/70' : 'text-muted-foreground')}>
-                  {office.city}
+                  {office.address}
                 </span>
               </li>
             </ul>
           </div>
 
           {showMaps && !isCompact && (
-            <div
-              className={cn(
-                'relative flex min-h-[140px] items-center justify-center border-t',
-                isDark
-                  ? 'border-white/10 bg-[linear-gradient(135deg,rgba(16,42,102,0.9),rgba(16,42,102,0.55)),repeating-linear-gradient(90deg,transparent,transparent_19px,rgba(212,175,55,0.08)_20px),repeating-linear-gradient(0deg,transparent,transparent_19px,rgba(255,255,255,0.04)_20px)]'
-                  : 'border-border bg-[linear-gradient(135deg,#f8fafc,#eef2ff),repeating-linear-gradient(90deg,transparent,transparent_19px,rgba(16,42,102,0.05)_20px),repeating-linear-gradient(0deg,transparent,transparent_19px,rgba(212,175,55,0.08)_20px)]',
-              )}
-              aria-label={`Map placeholder for ${office.mapLabel}`}
-            >
-              <div className="px-4 text-center">
-                <div
-                  className={cn(
-                    'mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full',
-                    isDark ? 'bg-secondary/20 text-secondary' : 'bg-primary/10 text-primary',
-                  )}
-                >
-                  <FaMapMarkerAlt size={16} />
-                </div>
-                <p
-                  className={cn(
-                    'text-sm font-medium',
-                    isDark ? 'text-white' : 'text-primary',
-                  )}
-                >
-                  {office.mapLabel}
-                </p>
-                <p
-                  className={cn(
-                    'mt-1 text-xs',
-                    isDark ? 'text-white/55' : 'text-muted-foreground',
-                  )}
-                >
-                  Google Maps placeholder
-                </p>
-              </div>
+            <div className={cn('relative min-h-[160px] overflow-hidden border-t', isDark ? 'border-white/10' : 'border-border')}>
+              <iframe
+                title={`Map of ${office.mapLabel}`}
+                src={office.mapEmbedUrl}
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
           )}
         </article>

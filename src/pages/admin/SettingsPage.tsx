@@ -44,7 +44,7 @@ export default function AdminSettingsPage() {
                 <p className="font-semibold text-primary">
                   {office.flag} {office.label}
                 </p>
-                <p className="mt-1 text-muted-foreground">{office.city}</p>
+                <p className="mt-1 text-muted-foreground">{office.address}</p>
                 <p className="mt-2 text-foreground">{office.phone}</p>
                 <p className="text-foreground">{office.email}</p>
               </li>
