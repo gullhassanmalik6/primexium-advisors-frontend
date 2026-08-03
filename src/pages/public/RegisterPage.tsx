@@ -12,9 +12,10 @@ import { useAuth } from '@/context/AuthContext'
 import { getErrorMessage } from '@/api/client'
 import { BRAND, ROUTES } from '@/constants'
 import { registerSchema, type RegisterFormValues } from '@/schemas/auth'
+import { getHomePath } from '@/utils/auth'
 
 export default function RegisterPage() {
-  const { register: registerUser, isAuthenticated, isLoading } = useAuth()
+  const { register: registerUser, isAuthenticated, user, isLoading } = useAuth()
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -34,21 +35,21 @@ export default function RegisterPage() {
     },
   })
 
-  if (!isLoading && isAuthenticated) {
-    return <Navigate to={ROUTES.student.dashboard} replace />
+  if (!isLoading && isAuthenticated && user) {
+    return <Navigate to={getHomePath(user.role)} replace />
   }
 
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null)
     try {
-      await registerUser({
+      const registeredUser = await registerUser({
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         phone: values.phone || undefined,
         password: values.password,
       })
-      navigate(ROUTES.student.dashboard, { replace: true })
+      navigate(getHomePath(registeredUser.role), { replace: true })
     } catch (error) {
       setServerError(getErrorMessage(error))
     }

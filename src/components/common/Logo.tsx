@@ -21,10 +21,10 @@ export function Logo({ variant = 'navbar', className, linkToHome = true }: LogoP
   const image = (
     <img
       src={logoImage}
-      alt={BRAND.name}
+      alt={`${BRAND.name} — Connecting Dreams to Destinations`}
       className={cn('object-contain object-left', variantStyles[variant], className)}
-      width={200}
-      height={80}
+      width={220}
+      height={220}
       loading="eager"
       decoding="async"
     />

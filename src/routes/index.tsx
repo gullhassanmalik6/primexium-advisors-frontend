@@ -6,6 +6,7 @@ import { PublicLayout } from '@/layouts/PublicLayout'
 import { StudentLayout } from '@/layouts/StudentLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
 import { ROUTES, USER_ROLES } from '@/constants'
+import { STAFF_ROLES } from '@/utils/auth'
 
 const HomePage = lazy(() => import('@/pages/public/HomePage'))
 const AboutPage = lazy(() => import('@/pages/public/AboutPage'))
@@ -46,14 +47,6 @@ const AdminEmployeesPage = lazy(() => import('@/pages/admin/EmployeesPage'))
 const AdminReportsPage = lazy(() => import('@/pages/admin/ReportsPage'))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/SettingsPage'))
 const AdminContentPage = lazy(() => import('@/pages/admin/ContentPage'))
-
-const ADMIN_ROLES: Array<(typeof USER_ROLES)[keyof typeof USER_ROLES]> = [
-  USER_ROLES.ADMIN,
-  USER_ROLES.COUNSELLOR,
-  USER_ROLES.DOCUMENTATION_OFFICER,
-  USER_ROLES.FINANCE,
-  USER_ROLES.MARKETING,
-]
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
@@ -128,7 +121,7 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <ProtectedRoute allowedRoles={ADMIN_ROLES}>
+      <ProtectedRoute allowedRoles={STAFF_ROLES}>
         <AdminLayout />
       </ProtectedRoute>
     ),

@@ -10,14 +10,9 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { FormField } from '@/components/ui/label'
 import { useAuth } from '@/context/AuthContext'
 import { getErrorMessage } from '@/api/client'
-import { BRAND, ROUTES, USER_ROLES } from '@/constants'
+import { BRAND, ROUTES } from '@/constants'
 import { loginSchema, type LoginFormValues } from '@/schemas/auth'
-import type { UserRole } from '@/types'
-
-function redirectForRole(role: UserRole) {
-  if (role === USER_ROLES.STUDENT) return ROUTES.student.dashboard
-  return ROUTES.admin.dashboard
-}
+import { getHomePath } from '@/utils/auth'
 
 export default function LoginPage() {
   const { login, isAuthenticated, user, isLoading } = useAuth()
@@ -37,14 +32,14 @@ export default function LoginPage() {
   })
 
   if (!isLoading && isAuthenticated && user) {
-    return <Navigate to={from || redirectForRole(user.role)} replace />
+    return <Navigate to={from || getHomePath(user.role)} replace />
   }
 
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null)
     try {
       const loggedInUser = await login(values)
-      navigate(from || redirectForRole(loggedInUser.role), { replace: true })
+      navigate(from || getHomePath(loggedInUser.role), { replace: true })
     } catch (error) {
       setServerError(getErrorMessage(error))
     }
