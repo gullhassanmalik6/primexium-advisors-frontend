@@ -1,10 +1,20 @@
 export type ApplicationStatus =
   | 'draft'
+  | 'registration_received'
+  | 'initial_assessment'
+  | 'documents_pending'
+  | 'documents_under_review'
+  | 'university_selection'
+  | 'application_preparation'
   | 'submitted'
   | 'under_review'
   | 'offer_received'
+  | 'further_action_required'
+  | 'campus_france'
   | 'visa_stage'
+  | 'pre_departure'
   | 'completed'
+  | 'on_hold'
   | 'rejected'
   | 'withdrawn'
 
@@ -39,8 +49,42 @@ export interface StudentApplication {
   intake: string
   status: ApplicationStatus
   notes?: string
+  studentNote?: string
+  nextAction?: string
+  nextActionDue?: string
+  missingDocuments?: string
+  stageCompletedAt?: string
   createdAt: string
   updatedAt: string
+}
+
+export interface ApplicationHistoryItem {
+  id: string
+  applicationId: string
+  fromStatus?: string
+  toStatus: string
+  studentSafeNote?: string
+  nextAction?: string
+  nextActionDue?: string
+  createdAt: string
+  changedByName?: string
+}
+
+export interface StudentVisibleFollowUp {
+  id: string
+  followUpDate: string
+  method: string
+  studentMessage?: string
+  nextAction?: string
+  nextFollowUpDate?: string
+  relatedStatus?: string
+  createdAt: string
+}
+
+export interface ApplicationTracking {
+  application: StudentApplication
+  history: ApplicationHistoryItem[]
+  visibleFollowUps: StudentVisibleFollowUp[]
 }
 
 export interface StudentDocument {

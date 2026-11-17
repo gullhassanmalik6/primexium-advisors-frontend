@@ -7,6 +7,7 @@ import type {
   DocumentCreatePayload,
   MessageCreatePayload,
   ProfileUpdatePayload,
+  ApplicationTracking,
   StudentApplication,
   StudentAppointment,
   StudentDocument,
@@ -24,6 +25,11 @@ interface ApplicationResponse {
   intake: string
   status: StudentApplication['status']
   notes?: string
+  student_note?: string
+  next_action?: string
+  next_action_due?: string
+  missing_documents?: string
+  stage_completed_at?: string
   created_at: string
   updated_at: string
 }
@@ -113,6 +119,11 @@ function mapApplication(data: ApplicationResponse): StudentApplication {
     intake: data.intake,
     status: data.status,
     notes: data.notes,
+    studentNote: data.student_note,
+    nextAction: data.next_action,
+    nextActionDue: data.next_action_due,
+    missingDocuments: data.missing_documents,
+    stageCompletedAt: data.stage_completed_at,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   }
@@ -223,6 +234,57 @@ export const studentApi = {
   listApplications: async () => {
     const { data } = await apiClient.get<ApplicationResponse[]>('/student/applications')
     return data.map(mapApplication)
+  },
+
+  getApplicationTracking: async (id: string) => {
+    const { data } = await apiClient.get<{
+      application: ApplicationResponse
+      history: Array<{
+        id: string
+        application_id: string
+        from_status?: string
+        to_status: string
+        student_safe_note?: string
+        next_action?: string
+        next_action_due?: string
+        created_at: string
+        changed_by_name?: string
+      }>
+      visible_follow_ups: Array<{
+        id: string
+        follow_up_date: string
+        method: string
+        student_message?: string
+        next_action?: string
+        next_follow_up_date?: string
+        related_status?: string
+        created_at: string
+      }>
+    }>(`/student/applications/${id}/tracking`)
+    return {
+      application: mapApplication(data.application),
+      history: data.history.map((item) => ({
+        id: item.id,
+        applicationId: item.application_id,
+        fromStatus: item.from_status,
+        toStatus: item.to_status,
+        studentSafeNote: item.student_safe_note,
+        nextAction: item.next_action,
+        nextActionDue: item.next_action_due,
+        createdAt: item.created_at,
+        changedByName: item.changed_by_name,
+      })),
+      visibleFollowUps: data.visible_follow_ups.map((item) => ({
+        id: item.id,
+        followUpDate: item.follow_up_date,
+        method: item.method,
+        studentMessage: item.student_message,
+        nextAction: item.next_action,
+        nextFollowUpDate: item.next_follow_up_date,
+        relatedStatus: item.related_status,
+        createdAt: item.created_at,
+      })),
+    } satisfies ApplicationTracking
   },
 
   createApplication: async (payload: ApplicationCreatePayload) => {

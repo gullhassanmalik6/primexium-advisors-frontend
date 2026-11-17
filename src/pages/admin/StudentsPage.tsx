@@ -5,16 +5,27 @@ import { EmptyState, PageIntro, PortalCard, StatusBadge } from '@/components/stu
 import { PageLoader } from '@/components/common/PageElements'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { getErrorMessage } from '@/api/client'
 import { adminApi } from '@/api/admin'
-import { BRAND, ROUTES } from '@/constants'
+import { useAuth } from '@/context/AuthContext'
+import { BRAND, REFERRAL_OPTIONS, ROUTES, USER_ROLES } from '@/constants'
 import type { AdminStudent } from '@/types/admin'
 
+function referralLabel(source?: string) {
+  if (!source) return null
+  return REFERRAL_OPTIONS.find((option) => option.value === source)?.label ?? source
+}
+
 export default function AdminStudentsPage() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === USER_ROLES.ADMIN
   const [students, setStudents] = useState<AdminStudent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [referralFilter, setReferralFilter] = useState('')
 
   const load = async () => {
     try {
@@ -32,12 +43,14 @@ export default function AdminStudentsPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return students
     return students.filter((student) => {
-      const haystack = `${student.firstName} ${student.lastName} ${student.email} ${student.phone ?? ''}`.toLowerCase()
+      if (referralFilter && student.referralSource !== referralFilter) return false
+      if (!q) return true
+      const haystack =
+        `${student.firstName} ${student.lastName} ${student.email} ${student.phone ?? ''} ${student.referralSource ?? ''} ${student.referralDetail ?? ''}`.toLowerCase()
       return haystack.includes(q)
     })
-  }, [students, query])
+  }, [students, query, referralFilter])
 
   const toggleActive = async (student: AdminStudent) => {
     try {
@@ -52,6 +65,30 @@ export default function AdminStudentsPage() {
     }
   }
 
+  const deleteStudent = async (student: AdminStudent) => {
+    const confirmed = window.confirm(
+      `Permanently delete ${student.firstName} ${student.lastName} (${student.email})?\n\nThis removes their applications, documents, payments, appointments, messages, and follow-ups. This cannot be undone.`,
+    )
+    if (!confirmed) return
+
+    const typed = window.prompt('Type DELETE to confirm permanent deletion:')
+    if (typed?.trim().toUpperCase() !== 'DELETE') {
+      setError('Deletion cancelled. You must type DELETE to confirm.')
+      return
+    }
+
+    setDeletingId(student.id)
+    setError(null)
+    try {
+      await adminApi.deleteStudent(student.id)
+      setStudents((prev) => prev.filter((item) => item.id !== student.id))
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   if (loading) return <PageLoader label="Loading students..." />
 
   return (
@@ -63,12 +100,27 @@ export default function AdminStudentsPage() {
         title="Students CRM"
         description="Search student accounts and open a full 360 profile for CRM management."
         action={
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name, email, phone"
-            className="w-64"
-          />
+          <div className="flex flex-wrap gap-2">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search name, email, phone, referral"
+              className="w-64"
+            />
+            <Select
+              value={referralFilter}
+              onChange={(e) => setReferralFilter(e.target.value)}
+              className="w-48"
+              aria-label="Filter by referral source"
+            >
+              <option value="">All referral sources</option>
+              {REFERRAL_OPTIONS.filter((option) => option.value !== 'not_specified').map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </div>
         }
       />
       {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
@@ -82,16 +134,20 @@ export default function AdminStudentsPage() {
                 key={student.id}
                 className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
-                  <h3 className="font-semibold text-primary">
+                <div className="min-w-0">
+                  <h3 className="break-words font-semibold text-primary">
                     {student.firstName} {student.lastName}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="break-words text-sm text-muted-foreground">
                     {student.email}
                     {student.phone ? ` · ${student.phone}` : ''}
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {student.applicationsCount} application(s)
+                    {referralLabel(student.referralSource)
+                      ? ` · Referral: ${referralLabel(student.referralSource)}`
+                      : ''}
+                    {student.referralDetail ? ` (${student.referralDetail})` : ''}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -105,6 +161,17 @@ export default function AdminStudentsPage() {
                   <Button variant="outline" size="sm" onClick={() => void toggleActive(student)}>
                     {student.isActive ? 'Deactivate' : 'Activate'}
                   </Button>
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      disabled={deletingId === student.id}
+                      onClick={() => void deleteStudent(student)}
+                    >
+                      {deletingId === student.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  )}
                 </div>
               </article>
             ))}

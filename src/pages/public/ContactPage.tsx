@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormField } from '@/components/ui/label'
 import { getErrorMessage } from '@/api/client'
 import { leadsApi } from '@/api/leads'
-import { BRAND, ROUTES } from '@/constants'
+import { BRAND, OFFICE_HOURS, ROUTES } from '@/constants'
 import { contactFormSchema, type ContactFormValues } from '@/schemas/leads'
 
 export default function ContactPage() {
@@ -59,27 +59,26 @@ export default function ContactPage() {
         <title>Contact Us | {BRAND.name}</title>
         <meta
           name="description"
-          content="Contact Primexium Advisors in Karachi, Pakistan and Paris, France for study abroad counselling, visas, and admissions support."
+          content="Contact Primexium Advisors Private Limited — Head Office at Amber Estate, Shahrah-e-Faisal, Karachi. Office hours Monday–Saturday 10:00 AM–6:00 PM PKT."
         />
       </Helmet>
 
       <PageHero
         eyebrow="Contact"
         title="Get in Touch"
-        description="Reach our international team in Karachi and Paris, or send a message for a free consultation."
+        description={`${BRAND.legalName} — visit our Karachi head office or message our international team.`}
       />
 
       <section className="container-wide section-padding">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-semibold text-primary sm:text-3xl">Our Offices</h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {BRAND.name} operates internationally from France and Pakistan. Our team typically
-            responds within one business day.
+            Head Office: {BRAND.address}. Business hours: {OFFICE_HOURS.label} ({OFFICE_HOURS.timezone}).
           </p>
         </div>
 
         <div className="mt-10">
-          <OfficeCards />
+          <OfficeCards showHours />
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

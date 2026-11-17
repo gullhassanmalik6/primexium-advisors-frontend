@@ -16,7 +16,10 @@ interface UserResponse {
   role: User['role']
   is_active: boolean
   avatar_url?: string
+  referral_source?: string
+  referral_detail?: string
   created_at: string
+  updated_at?: string
 }
 
 function mapUser(data: UserResponse): User {
@@ -29,7 +32,10 @@ function mapUser(data: UserResponse): User {
     role: data.role,
     isActive: data.is_active,
     avatarUrl: data.avatar_url,
+    referralSource: data.referral_source,
+    referralDetail: data.referral_detail,
     createdAt: data.created_at,
+    updatedAt: data.updated_at,
   }
 }
 
@@ -51,11 +57,13 @@ export const authApi = {
 
   register: async (payload: RegisterData) => {
     const { data } = await apiClient.post<UserResponse>('/auth/register', {
-      email: payload.email,
+      email: payload.email.trim().toLowerCase(),
       password: payload.password,
-      first_name: payload.firstName,
-      last_name: payload.lastName,
-      phone: payload.phone,
+      first_name: payload.firstName.trim(),
+      last_name: payload.lastName.trim(),
+      phone: payload.phone?.trim() || undefined,
+      referral_source: payload.referralSource || undefined,
+      referral_detail: payload.referralDetail?.trim() || undefined,
     })
     return mapUser(data)
   },

@@ -5,12 +5,22 @@ import type {
   AdminAppointment,
   AdminDashboardStats,
   AdminDocument,
+  AdminFollowUp,
   AdminLead,
   AdminMessage,
   AdminPayment,
   AdminStudent,
+  ApplicationHistoryItem,
+  ApplicationUpdatePayload,
   CrmOverview,
   EmployeeCreatePayload,
+  FinanceEntry,
+  FinanceEntryCreatePayload,
+  FinanceEntryType,
+  FinanceEntryUpdatePayload,
+  FinanceSummary,
+  FollowUpCreatePayload,
+  FollowUpUpdatePayload,
   LeadConvertResult,
   LeadStatus,
   PaymentCreatePayload,
@@ -63,8 +73,53 @@ interface UserResponse {
   role: UserRole
   is_active: boolean
   avatar_url?: string
+  referral_source?: string
+  referral_detail?: string
   created_at: string
+  updated_at?: string
   applications_count?: number
+}
+
+interface ApplicationApiResponse {
+  id: string
+  student_id: string
+  university_name: string
+  country: string
+  program_name: string
+  degree_level: string
+  intake: string
+  status: ApplicationStatus
+  notes?: string
+  student_note?: string
+  next_action?: string
+  next_action_due?: string
+  missing_documents?: string
+  stage_completed_at?: string
+  created_at: string
+  updated_at: string
+  student_email?: string
+  student_name?: string
+}
+
+interface FollowUpApiResponse {
+  id: string
+  student_id: string
+  application_id?: string
+  staff_id?: string
+  follow_up_date: string
+  method: string
+  summary: string
+  next_action?: string
+  next_follow_up_date?: string
+  status: string
+  visible_to_student: boolean
+  student_message?: string
+  related_status?: string
+  created_at: string
+  updated_at: string
+  student_name?: string
+  student_email?: string
+  is_overdue?: boolean
 }
 
 function mapUser(data: UserResponse): User {
@@ -77,7 +132,60 @@ function mapUser(data: UserResponse): User {
     role: data.role,
     isActive: data.is_active,
     avatarUrl: data.avatar_url,
+    referralSource: data.referral_source,
+    referralDetail: data.referral_detail,
     createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
+}
+
+function mapApplication(data: ApplicationApiResponse): AdminApplication {
+  return {
+    id: data.id,
+    studentId: data.student_id,
+    universityName: data.university_name,
+    country: data.country,
+    programName: data.program_name,
+    degreeLevel: data.degree_level,
+    intake: data.intake,
+    status: data.status,
+    notes: data.notes,
+    studentNote: data.student_note,
+    nextAction: data.next_action,
+    nextActionDue: data.next_action_due,
+    missingDocuments: data.missing_documents,
+    stageCompletedAt: data.stage_completed_at,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    studentEmail: data.student_email ?? '',
+    studentName: data.student_name ?? '',
+  }
+}
+
+function mapFollowUp(data: FollowUpApiResponse): AdminFollowUp {
+  const today = new Date().toISOString().slice(0, 10)
+  const isOverdue =
+    data.is_overdue ??
+    (data.status === 'pending' && Boolean(data.follow_up_date) && data.follow_up_date < today)
+  return {
+    id: data.id,
+    studentId: data.student_id,
+    applicationId: data.application_id,
+    staffId: data.staff_id,
+    followUpDate: data.follow_up_date,
+    method: data.method,
+    summary: data.summary,
+    nextAction: data.next_action,
+    nextFollowUpDate: data.next_follow_up_date,
+    status: data.status,
+    visibleToStudent: data.visible_to_student,
+    studentMessage: data.student_message,
+    relatedStatus: data.related_status,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    studentName: data.student_name,
+    studentEmail: data.student_email,
+    isOverdue,
   }
 }
 
@@ -210,19 +318,7 @@ export const adminApi = {
   getStudentDetail: async (id: string) => {
     const { data } = await apiClient.get<{
       student: UserResponse
-      applications: Array<{
-        id: string
-        student_id: string
-        university_name: string
-        country: string
-        program_name: string
-        degree_level: string
-        intake: string
-        status: ApplicationStatus
-        notes?: string
-        created_at: string
-        updated_at: string
-      }>
+      applications: ApplicationApiResponse[]
       documents: Array<{
         id: string
         student_id: string
@@ -278,19 +374,7 @@ export const adminApi = {
         ...mapUser(data.student),
         applicationsCount: data.student.applications_count ?? data.applications.length,
       },
-      applications: data.applications.map((item) => ({
-        id: item.id,
-        studentId: item.student_id,
-        universityName: item.university_name,
-        country: item.country,
-        programName: item.program_name,
-        degreeLevel: item.degree_level,
-        intake: item.intake,
-        status: item.status,
-        notes: item.notes,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at,
-      })),
+      applications: data.applications.map((item) => mapApplication(item)),
       documents: data.documents.map((item) => ({
         id: item.id,
         studentId: item.student_id,
@@ -349,46 +433,94 @@ export const adminApi = {
     return mapUser(data)
   },
 
+  deleteStudent: async (id: string) => {
+    await apiClient.delete(`/admin/students/${id}`)
+  },
+
   listApplications: async () => {
-    const { data } = await apiClient.get<
-      Array<{
-        id: string
-        student_id: string
-        university_name: string
-        country: string
-        program_name: string
-        degree_level: string
-        intake: string
-        status: ApplicationStatus
-        notes?: string
-        created_at: string
-        updated_at: string
-        student_email: string
-        student_name: string
-      }>
-    >('/admin/applications')
-    return data.map(
-      (item) =>
-        ({
-          id: item.id,
-          studentId: item.student_id,
-          universityName: item.university_name,
-          country: item.country,
-          programName: item.program_name,
-          degreeLevel: item.degree_level,
-          intake: item.intake,
-          status: item.status,
-          notes: item.notes,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-          studentEmail: item.student_email,
-          studentName: item.student_name,
-        }) satisfies AdminApplication,
-    )
+    const { data } = await apiClient.get<ApplicationApiResponse[]>('/admin/applications')
+    return data.map((item) => mapApplication(item))
   },
 
   updateApplicationStatus: async (id: string, status: ApplicationStatus, notes?: string) => {
     await apiClient.patch(`/admin/applications/${id}`, { status, notes })
+  },
+
+  updateApplication: async (id: string, payload: ApplicationUpdatePayload) => {
+    const { data } = await apiClient.patch<ApplicationApiResponse>(`/admin/applications/${id}`, {
+      status: payload.status,
+      notes: payload.notes,
+      student_note: payload.studentNote,
+      next_action: payload.nextAction,
+      next_action_due: payload.nextActionDue || null,
+      missing_documents: payload.missingDocuments,
+    })
+    return mapApplication(data)
+  },
+
+  getApplicationHistory: async (id: string) => {
+    const { data } = await apiClient.get<
+      Array<{
+        id: string
+        application_id: string
+        from_status?: string
+        to_status: string
+        student_safe_note?: string
+        next_action?: string
+        next_action_due?: string
+        created_at: string
+        changed_by_name?: string
+      }>
+    >(`/admin/applications/${id}/history`)
+    return data.map(
+      (item) =>
+        ({
+          id: item.id,
+          applicationId: item.application_id,
+          fromStatus: item.from_status,
+          toStatus: item.to_status,
+          studentSafeNote: item.student_safe_note,
+          nextAction: item.next_action,
+          nextActionDue: item.next_action_due,
+          createdAt: item.created_at,
+          changedByName: item.changed_by_name,
+        }) satisfies ApplicationHistoryItem,
+    )
+  },
+
+  listFollowUps: async (params?: { overdueOnly?: boolean }) => {
+    const { data } = await apiClient.get<FollowUpApiResponse[]>('/admin/follow-ups', {
+      params: params?.overdueOnly ? { overdue_only: true } : undefined,
+    })
+    return data.map(mapFollowUp)
+  },
+
+  createFollowUp: async (payload: FollowUpCreatePayload) => {
+    const { data } = await apiClient.post<FollowUpApiResponse>('/admin/follow-ups', {
+      student_id: payload.studentId,
+      application_id: payload.applicationId || null,
+      follow_up_date: payload.followUpDate,
+      method: payload.method,
+      summary: payload.summary,
+      next_action: payload.nextAction,
+      next_follow_up_date: payload.nextFollowUpDate || null,
+      visible_to_student: payload.visibleToStudent ?? false,
+      student_message: payload.studentMessage,
+      related_status: payload.relatedStatus,
+    })
+    return mapFollowUp(data)
+  },
+
+  updateFollowUp: async (id: string, payload: FollowUpUpdatePayload) => {
+    const { data } = await apiClient.patch<FollowUpApiResponse>(`/admin/follow-ups/${id}`, {
+      status: payload.status,
+      summary: payload.summary,
+      next_action: payload.nextAction,
+      next_follow_up_date: payload.nextFollowUpDate,
+      visible_to_student: payload.visibleToStudent,
+      student_message: payload.studentMessage,
+    })
+    return mapFollowUp(data)
   },
 
   listDocuments: async () => {
@@ -600,5 +732,187 @@ export const adminApi = {
       phone: payload.phone,
     })
     return mapUser(data)
+  },
+
+  getFinanceSummary: async (params?: { from?: string; to?: string }) => {
+    const { data } = await apiClient.get<{
+      currency: string
+      date_from?: string
+      date_to?: string
+      total_income: string | number
+      total_expense: string | number
+      total_saving: string | number
+      total_investment: string | number
+      net_profit_loss: string | number
+      remaining_available: string | number
+      student_fees_paid_reference: string | number
+      by_category: Array<{ key: string; label: string; amount: string | number; count: number }>
+      by_member: Array<{ key: string; label: string; amount: string | number; count: number }>
+      by_month: Array<{ key: string; label: string; amount: string | number; count: number }>
+      entry_count: number
+    }>('/admin/finance/summary', { params: { from: params?.from, to: params?.to } })
+    return {
+      currency: data.currency,
+      dateFrom: data.date_from,
+      dateTo: data.date_to,
+      totalIncome: Number(data.total_income),
+      totalExpense: Number(data.total_expense),
+      totalSaving: Number(data.total_saving),
+      totalInvestment: Number(data.total_investment),
+      netProfitLoss: Number(data.net_profit_loss),
+      remainingAvailable: Number(data.remaining_available),
+      studentFeesPaidReference: Number(data.student_fees_paid_reference),
+      byCategory: data.by_category.map((item) => ({
+        key: item.key,
+        label: item.label,
+        amount: Number(item.amount),
+        count: item.count,
+      })),
+      byMember: data.by_member.map((item) => ({
+        key: item.key,
+        label: item.label,
+        amount: Number(item.amount),
+        count: item.count,
+      })),
+      byMonth: data.by_month.map((item) => ({
+        key: item.key,
+        label: item.label,
+        amount: Number(item.amount),
+        count: item.count,
+      })),
+      entryCount: data.entry_count,
+    } satisfies FinanceSummary
+  },
+
+  listFinanceEntries: async (params?: {
+    from?: string
+    to?: string
+    type?: FinanceEntryType
+    category?: string
+    paidBy?: string
+  }) => {
+    const { data } = await apiClient.get<
+      Array<{
+        id: string
+        entry_date: string
+        type: FinanceEntry['type']
+        category: FinanceEntry['category']
+        title: string
+        amount: string | number
+        currency: string
+        paid_by_name?: string
+        paid_by_user_id?: string
+        payment_method: FinanceEntry['paymentMethod']
+        notes?: string
+        attachment_url?: string
+        is_active: boolean
+        created_by_id?: string
+        created_by_name?: string
+        created_at: string
+        updated_at: string
+      }>
+    >('/admin/finance/entries', {
+      params: {
+        from: params?.from,
+        to: params?.to,
+        type: params?.type,
+        category: params?.category,
+        paid_by: params?.paidBy,
+      },
+    })
+    return data.map(
+      (item) =>
+        ({
+          id: item.id,
+          entryDate: item.entry_date,
+          type: item.type,
+          category: item.category,
+          title: item.title,
+          amount: Number(item.amount),
+          currency: item.currency,
+          paidByName: item.paid_by_name,
+          paidByUserId: item.paid_by_user_id,
+          paymentMethod: item.payment_method,
+          notes: item.notes,
+          attachmentUrl: item.attachment_url,
+          isActive: item.is_active,
+          createdById: item.created_by_id,
+          createdByName: item.created_by_name,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at,
+        }) satisfies FinanceEntry,
+    )
+  },
+
+  createFinanceEntry: async (payload: FinanceEntryCreatePayload) => {
+    const { data } = await apiClient.post<{
+      id: string
+      entry_date: string
+      type: FinanceEntry['type']
+      category: FinanceEntry['category']
+      title: string
+      amount: string | number
+      currency: string
+      paid_by_name?: string
+      paid_by_user_id?: string
+      payment_method: FinanceEntry['paymentMethod']
+      notes?: string
+      attachment_url?: string
+      is_active: boolean
+      created_by_id?: string
+      created_by_name?: string
+      created_at: string
+      updated_at: string
+    }>('/admin/finance/entries', {
+      entry_date: payload.entryDate,
+      type: payload.type,
+      category: payload.category,
+      title: payload.title,
+      amount: payload.amount,
+      currency: payload.currency ?? 'PKR',
+      paid_by_name: payload.paidByName,
+      paid_by_user_id: payload.paidByUserId,
+      payment_method: payload.paymentMethod ?? 'cash',
+      notes: payload.notes,
+    })
+    return {
+      id: data.id,
+      entryDate: data.entry_date,
+      type: data.type,
+      category: data.category,
+      title: data.title,
+      amount: Number(data.amount),
+      currency: data.currency,
+      paidByName: data.paid_by_name,
+      paidByUserId: data.paid_by_user_id,
+      paymentMethod: data.payment_method,
+      notes: data.notes,
+      attachmentUrl: data.attachment_url,
+      isActive: data.is_active,
+      createdById: data.created_by_id,
+      createdByName: data.created_by_name,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    } satisfies FinanceEntry
+  },
+
+  updateFinanceEntry: async (id: string, payload: FinanceEntryUpdatePayload) => {
+    await apiClient.patch(`/admin/finance/entries/${id}`, {
+      entry_date: payload.entryDate,
+      type: payload.type,
+      category: payload.category,
+      title: payload.title,
+      amount: payload.amount,
+      currency: payload.currency,
+      paid_by_name: payload.paidByName,
+      paid_by_user_id: payload.paidByUserId,
+      payment_method: payload.paymentMethod,
+      notes: payload.notes,
+      is_active: payload.isActive,
+    })
+  },
+
+  deleteFinanceEntry: async (id: string) => {
+    await apiClient.delete(`/admin/finance/entries/${id}`)
   },
 }

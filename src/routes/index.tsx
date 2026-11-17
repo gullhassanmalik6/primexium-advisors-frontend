@@ -39,8 +39,10 @@ const AdminLeadsPage = lazy(() => import('@/pages/admin/LeadsPage'))
 const AdminStudentsPage = lazy(() => import('@/pages/admin/StudentsPage'))
 const AdminStudentDetailPage = lazy(() => import('@/pages/admin/StudentDetailPage'))
 const AdminApplicationsPage = lazy(() => import('@/pages/admin/ApplicationsPage'))
+const AdminFollowUpsPage = lazy(() => import('@/pages/admin/FollowUpsPage'))
 const AdminDocumentsPage = lazy(() => import('@/pages/admin/DocumentsPage'))
 const AdminPaymentsPage = lazy(() => import('@/pages/admin/PaymentsPage'))
+const AdminFinancePage = lazy(() => import('@/pages/admin/FinancePage'))
 const AdminAppointmentsPage = lazy(() => import('@/pages/admin/AppointmentsPage'))
 const AdminMessagesPage = lazy(() => import('@/pages/admin/MessagesPage'))
 const AdminEmployeesPage = lazy(() => import('@/pages/admin/EmployeesPage'))
@@ -132,8 +134,10 @@ export const router = createBrowserRouter([
       { path: 'students', element: <LazyPage><AdminStudentsPage /></LazyPage> },
       { path: 'students/:id', element: <LazyPage><AdminStudentDetailPage /></LazyPage> },
       { path: 'applications', element: <LazyPage><AdminApplicationsPage /></LazyPage> },
+      { path: 'follow-ups', element: <LazyPage><AdminFollowUpsPage /></LazyPage> },
       { path: 'documents', element: <LazyPage><AdminDocumentsPage /></LazyPage> },
       { path: 'payments', element: <LazyPage><AdminPaymentsPage /></LazyPage> },
+      { path: 'finance', element: <LazyPage><AdminFinancePage /></LazyPage> },
       { path: 'appointments', element: <LazyPage><AdminAppointmentsPage /></LazyPage> },
       { path: 'messages', element: <LazyPage><AdminMessagesPage /></LazyPage> },
       { path: 'employees', element: <LazyPage><AdminEmployeesPage /></LazyPage> },

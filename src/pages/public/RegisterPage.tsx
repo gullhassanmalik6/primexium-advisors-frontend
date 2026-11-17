@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
+import { Select } from '@/components/ui/select'
 import { FormField } from '@/components/ui/label'
 import { useAuth } from '@/context/AuthContext'
 import { getErrorMessage } from '@/api/client'
-import { BRAND, ROUTES } from '@/constants'
+import { BRAND, REFERRAL_OPTIONS, ROUTES } from '@/constants'
 import { registerSchema, type RegisterFormValues } from '@/schemas/auth'
 import { getHomePath } from '@/utils/auth'
 
@@ -18,10 +19,12 @@ export default function RegisterPage() {
   const { register: registerUser, isAuthenticated, user, isLoading } = useAuth()
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -32,8 +35,12 @@ export default function RegisterPage() {
       phone: '',
       password: '',
       confirmPassword: '',
+      referralSource: '',
+      referralDetail: '',
     },
   })
+
+  const referralSource = useWatch({ control, name: 'referralSource' })
 
   if (!isLoading && isAuthenticated && user) {
     return <Navigate to={getHomePath(user.role)} replace />
@@ -41,6 +48,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null)
+    setSuccessMessage(null)
     try {
       const registeredUser = await registerUser({
         firstName: values.firstName,
@@ -48,7 +56,13 @@ export default function RegisterPage() {
         email: values.email,
         phone: values.phone || undefined,
         password: values.password,
+        referralSource:
+          values.referralSource && values.referralSource !== 'not_specified'
+            ? values.referralSource
+            : undefined,
+        referralDetail: values.referralDetail || undefined,
       })
+      setSuccessMessage('Account created successfully. Redirecting to your portal...')
       navigate(getHomePath(registeredUser.role), { replace: true })
     } catch (error) {
       setServerError(getErrorMessage(error))
@@ -83,7 +97,7 @@ export default function RegisterPage() {
               </p>
               <h1 className="mt-2 text-3xl font-bold text-primary">Create account</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Join Primexium and start your study abroad journey
+                Join {BRAND.legalName} and start your study abroad journey
               </p>
             </div>
 
@@ -118,10 +132,41 @@ export default function RegisterPage() {
                 <Input
                   type="tel"
                   autoComplete="tel"
-                  placeholder="+92 300 0000000"
+                  placeholder="+92 329 2595900"
                   {...register('phone')}
                 />
               </FormField>
+
+              <FormField label="How did you hear about us?" error={errors.referralSource?.message}>
+                <Select {...register('referralSource')} defaultValue="">
+                  <option value="">Select an option (optional)</option>
+                  {REFERRAL_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+
+              {(referralSource === 'other' ||
+                referralSource === 'friend_or_family' ||
+                referralSource === 'existing_student' ||
+                referralSource === 'educational_agent') && (
+                <FormField
+                  label={referralSource === 'other' ? 'Please specify' : 'Referred by / referral code'}
+                  required={referralSource === 'other'}
+                  error={errors.referralDetail?.message}
+                >
+                  <Input
+                    placeholder={
+                      referralSource === 'other'
+                        ? 'Tell us how you found us'
+                        : 'Name or referral code (optional)'
+                    }
+                    {...register('referralDetail')}
+                  />
+                </FormField>
+              )}
 
               <FormField label="Password" required error={errors.password?.message}>
                 <PasswordInput
@@ -145,6 +190,26 @@ export default function RegisterPage() {
                   className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
                 >
                   {serverError}
+                  {(serverError.toLowerCase().includes('already') ||
+                    serverError.toLowerCase().includes('sign in')) && (
+                    <p className="mt-2">
+                      <Link to={ROUTES.login} className="font-semibold underline">
+                        Sign in
+                      </Link>
+                      {' · '}
+                      <Link to={ROUTES.forgotPassword} className="font-semibold underline">
+                        Forgot password?
+                      </Link>
+                    </p>
+                  )}
+                </div>
+              )}
+              {successMessage && (
+                <div
+                  role="status"
+                  className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+                >
+                  {successMessage}
                 </div>
               )}
 

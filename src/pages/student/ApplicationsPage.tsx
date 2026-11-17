@@ -13,8 +13,9 @@ import { FormField } from '@/components/ui/label'
 import { getErrorMessage } from '@/api/client'
 import { studentApi } from '@/api/student'
 import { CONSULTATION_COUNTRIES, CONSULTATION_DEGREES, CONSULTATION_INTAKES } from '@/constants/content'
-import { BRAND } from '@/constants'
-import type { StudentApplication } from '@/types/student'
+import { APPLICATION_PIPELINE, APPLICATION_STATUS_LABELS, BRAND, ROUTES } from '@/constants'
+import type { ApplicationTracking, StudentApplication } from '@/types/student'
+import { Link } from 'react-router-dom'
 
 const schema = z.object({
   universityName: z.string().min(2, 'University is required'),
@@ -29,10 +30,15 @@ type FormValues = z.infer<typeof schema>
 
 function statusTone(status: StudentApplication['status']) {
   if (status === 'completed' || status === 'offer_received') return 'success'
-  if (status === 'rejected' || status === 'withdrawn') return 'danger'
-  if (status === 'under_review' || status === 'visa_stage') return 'info'
-  if (status === 'submitted') return 'warning'
+  if (status === 'rejected' || status === 'withdrawn' || status === 'on_hold') return 'danger'
+  if (status === 'under_review' || status === 'visa_stage' || status === 'campus_france') return 'info'
+  if (status === 'submitted' || status === 'documents_pending') return 'warning'
   return 'neutral'
+}
+
+function progressIndex(status: string) {
+  const idx = APPLICATION_PIPELINE.indexOf(status as (typeof APPLICATION_PIPELINE)[number])
+  return idx >= 0 ? idx : 0
 }
 
 export default function StudentApplicationsPage() {
@@ -40,6 +46,9 @@ export default function StudentApplicationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [trackingId, setTrackingId] = useState<string | null>(null)
+  const [tracking, setTracking] = useState<ApplicationTracking | null>(null)
+  const [trackingLoading, setTrackingLoading] = useState(false)
 
   const {
     register,
@@ -86,6 +95,25 @@ export default function StudentApplicationsPage() {
     }
   }
 
+  const openTracking = async (id: string) => {
+    if (trackingId === id) {
+      setTrackingId(null)
+      setTracking(null)
+      return
+    }
+    setTrackingId(id)
+    setTrackingLoading(true)
+    setError(null)
+    try {
+      setTracking(await studentApi.getApplicationTracking(id))
+    } catch (err) {
+      setError(getErrorMessage(err))
+      setTrackingId(null)
+    } finally {
+      setTrackingLoading(false)
+    }
+  }
+
   if (loading) return <PageLoader label="Loading applications..." />
 
   return (
@@ -95,8 +123,8 @@ export default function StudentApplicationsPage() {
       </Helmet>
 
       <PageIntro
-        title="Applications"
-        description="Create and track your university applications."
+        title="Application Tracking"
+        description="Check your live application status, completed stages, pending actions, and counsellor updates."
         action={
           <Button onClick={() => setShowForm((v) => !v)}>
             {showForm ? 'Close form' : 'New Application'}
@@ -171,25 +199,131 @@ export default function StudentApplicationsPage() {
           />
         ) : (
           <div className="space-y-3">
-            {applications.map((app) => (
-              <article
-                key={app.id}
-                className="rounded-xl border border-border px-4 py-4 transition hover:border-primary/20"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h3 className="font-semibold text-primary">{app.universityName}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {app.programName} · {app.degreeLevel}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {app.country} · {app.intake} intake
-                    </p>
+            {applications.map((app) => {
+              const step = progressIndex(app.status)
+              const pct = Math.round(((step + 1) / APPLICATION_PIPELINE.length) * 100)
+              return (
+                <article
+                  key={app.id}
+                  className="rounded-xl border border-border px-4 py-4 transition hover:border-primary/20"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-primary break-words">{app.universityName}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground break-words">
+                        {app.programName} · {app.degreeLevel}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {app.country} · {app.intake} intake
+                      </p>
+                      <p className="mt-2 text-sm text-foreground">
+                        Current stage:{' '}
+                        <span className="font-medium">
+                          {APPLICATION_STATUS_LABELS[app.status] ?? app.status}
+                        </span>
+                      </p>
+                      {app.studentNote && (
+                        <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                          {app.studentNote}
+                        </p>
+                      )}
+                      {app.nextAction && (
+                        <p className="mt-2 text-sm text-secondary">
+                          Next action: {app.nextAction}
+                          {app.nextActionDue ? ` (by ${app.nextActionDue})` : ''}
+                        </p>
+                      )}
+                      {app.missingDocuments && (
+                        <p className="mt-1 text-sm text-destructive">
+                          Missing documents: {app.missingDocuments}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Last update: {new Date(app.updatedAt).toLocaleString()}
+                      </p>
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-secondary transition-all"
+                          style={{ width: `${pct}%` }}
+                          aria-label={`Progress ${pct}%`}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                      <StatusBadge
+                        label={APPLICATION_STATUS_LABELS[app.status] ?? app.status}
+                        tone={statusTone(app.status)}
+                      />
+                      <Button size="sm" variant="outline" onClick={() => void openTracking(app.id)}>
+                        {trackingId === app.id ? 'Hide history' : 'View progress'}
+                      </Button>
+                    </div>
                   </div>
-                  <StatusBadge label={app.status} tone={statusTone(app.status)} />
-                </div>
-              </article>
-            ))}
+
+                  {trackingId === app.id && (
+                    <div className="mt-4 space-y-4 border-t border-border pt-4">
+                      {trackingLoading && <p className="text-sm text-muted-foreground">Loading history...</p>}
+                      {tracking && !trackingLoading && (
+                        <>
+                          <div>
+                            <h4 className="text-sm font-semibold text-primary">Stage history</h4>
+                            <ol className="mt-3 space-y-3">
+                              {tracking.history.length === 0 ? (
+                                <li className="text-sm text-muted-foreground">No history yet.</li>
+                              ) : (
+                                tracking.history.map((item) => (
+                                  <li key={item.id} className="rounded-lg bg-muted/50 px-3 py-2">
+                                    <p className="text-sm font-medium text-primary">
+                                      {APPLICATION_STATUS_LABELS[item.toStatus] ?? item.toStatus}
+                                    </p>
+                                    {item.studentSafeNote && (
+                                      <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
+                                        {item.studentSafeNote}
+                                      </p>
+                                    )}
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      {new Date(item.createdAt).toLocaleString()}
+                                    </p>
+                                  </li>
+                                ))
+                              )}
+                            </ol>
+                          </div>
+                          {tracking.visibleFollowUps.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-primary">Updates from your counsellor</h4>
+                              <ul className="mt-3 space-y-2">
+                                {tracking.visibleFollowUps.map((item) => (
+                                  <li key={item.id} className="rounded-lg border border-border px-3 py-2 text-sm">
+                                    <p className="whitespace-pre-wrap">
+                                      {item.studentMessage || item.nextAction || 'Follow-up recorded'}
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      {item.followUpDate} · {item.method}
+                                    </p>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            Questions?{' '}
+                            <Link to={ROUTES.student.messages} className="font-medium text-secondary hover:underline">
+                              Message your counsellor
+                            </Link>{' '}
+                            or{' '}
+                            <Link to={ROUTES.contact} className="font-medium text-secondary hover:underline">
+                              contact the office
+                            </Link>
+                            .
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </article>
+              )
+            })}
           </div>
         )}
       </PortalCard>

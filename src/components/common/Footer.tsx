@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom'
-import { FaEnvelope, FaFacebookF, FaInstagram, FaLinkedinIn, FaPhone, FaWhatsapp } from 'react-icons/fa'
+import {
+  FaEnvelope,
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaPhone,
+  FaTiktok,
+  FaWhatsapp,
+  FaYoutube,
+} from 'react-icons/fa'
 import { Logo } from '@/components/common/Logo'
-import { BRAND, NAV_LINKS, OFFICES, ROUTES } from '@/constants'
+import { BRAND, NAV_LINKS, OFFICE_HOURS, OFFICES, ROUTES, SOCIAL_LINKS } from '@/constants'
 
 const FOOTER_LINKS = {
   services: [
@@ -34,26 +43,36 @@ export function Footer() {
               <Logo variant="footer" linkToHome />
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
-              {BRAND.tagline}. An international education consultancy operating from Karachi, Pakistan
-              and Paris, France.
+              {BRAND.legalName}. {BRAND.tagline}.
             </p>
-            <div className="mt-6 flex gap-3">
-              {[FaFacebookF, FaInstagram, FaLinkedinIn, FaWhatsapp].map((Icon, i) => (
-                <a
-                  key={i}
-                  href={
-                    Icon === FaWhatsapp
-                      ? `https://wa.me/${BRAND.whatsapp.replace(/\D/g, '')}`
-                      : '#'
-                  }
-                  target={Icon === FaWhatsapp ? '_blank' : undefined}
-                  rel={Icon === FaWhatsapp ? 'noopener noreferrer' : undefined}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-secondary hover:text-primary"
-                  aria-label="Social link"
-                >
-                  <Icon size={16} />
-                </a>
-              ))}
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">{BRAND.address}</p>
+            <p className="mt-2 text-xs text-white/55">
+              {OFFICE_HOURS.label} · {OFFICE_HOURS.timezone}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {(
+                [
+                  { Icon: FaFacebookF, href: SOCIAL_LINKS.facebook, label: 'Facebook' },
+                  { Icon: FaInstagram, href: SOCIAL_LINKS.instagram, label: 'Instagram' },
+                  { Icon: FaLinkedinIn, href: SOCIAL_LINKS.linkedin, label: 'LinkedIn' },
+                  { Icon: FaYoutube, href: SOCIAL_LINKS.youtube, label: 'YouTube' },
+                  { Icon: FaTiktok, href: SOCIAL_LINKS.tiktok, label: 'TikTok' },
+                  { Icon: FaWhatsapp, href: SOCIAL_LINKS.whatsapp, label: 'WhatsApp' },
+                ] as const
+              )
+                .filter((item) => Boolean(item.href))
+                .map(({ Icon, href, label }) => (
+                  <a
+                    key={label}
+                    href={href!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition-colors hover:bg-secondary hover:text-primary"
+                    aria-label={label}
+                  >
+                    <Icon size={16} />
+                  </a>
+                ))}
             </div>
           </div>
 

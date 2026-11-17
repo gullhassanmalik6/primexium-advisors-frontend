@@ -15,7 +15,10 @@ export interface User {
   isActive: boolean
   avatarUrl?: string
   phone?: string
+  referralSource?: string
+  referralDetail?: string
   createdAt: string
+  updatedAt?: string
 }
 
 export interface AuthTokens {
@@ -35,6 +38,8 @@ export interface RegisterData {
   firstName: string
   lastName: string
   phone?: string
+  referralSource?: string
+  referralDetail?: string
 }
 
 export interface ApiError {

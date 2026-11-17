@@ -6,7 +6,7 @@ import { PageLoader } from '@/components/common/PageElements'
 import { getErrorMessage } from '@/api/client'
 import { adminApi } from '@/api/admin'
 import { BRAND, ROUTES } from '@/constants'
-import type { CrmOverview, LeadStatus } from '@/types/admin'
+import type { CrmOverview, FinanceSummary, LeadStatus } from '@/types/admin'
 
 function tone(status: LeadStatus) {
   if (status === 'converted' || status === 'qualified') return 'success'
@@ -15,15 +15,33 @@ function tone(status: LeadStatus) {
   return 'warning'
 }
 
+function money(amount: number) {
+  return `PKR ${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+}
+
+function monthBounds(d = new Date()) {
+  const from = new Date(d.getFullYear(), d.getMonth(), 1)
+  const to = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+  const iso = (value: Date) => value.toISOString().slice(0, 10)
+  return { from: iso(from), to: iso(to) }
+}
+
 export default function AdminDashboardPage() {
   const [overview, setOverview] = useState<CrmOverview | null>(null)
+  const [finance, setFinance] = useState<FinanceSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
+      const range = monthBounds()
       try {
-        setOverview(await adminApi.getCrmOverview())
+        const [crm, financeSummary] = await Promise.all([
+          adminApi.getCrmOverview(),
+          adminApi.getFinanceSummary(range).catch(() => null),
+        ])
+        setOverview(crm)
+        setFinance(financeSummary)
       } catch (err) {
         setError(getErrorMessage(err))
       } finally {
@@ -47,13 +65,14 @@ export default function AdminDashboardPage() {
     { label: 'Total Leads', value: stats?.leadsTotal ?? 0, href: ROUTES.admin.leads },
   ]
 
-  const pipeline = [
-    'new',
-    'contacted',
-    'qualified',
-    'converted',
-    'closed',
-  ] as const
+  const financeCards = [
+    { label: 'Income (this month)', value: finance?.totalIncome ?? 0 },
+    { label: 'Expense (this month)', value: finance?.totalExpense ?? 0 },
+    { label: 'Profit / Loss', value: finance?.netProfitLoss ?? 0 },
+    { label: 'Remaining', value: finance?.remainingAvailable ?? 0 },
+  ]
+
+  const pipeline = ['new', 'contacted', 'qualified', 'converted', 'closed'] as const
 
   return (
     <>
@@ -62,9 +81,36 @@ export default function AdminDashboardPage() {
       </Helmet>
       <PageIntro
         title="CRM Dashboard"
-        description="Live overview of leads, students, applications, and operations across Karachi and Paris."
+        description="Live overview of leads, students, applications, finance, and operations across Karachi and Paris."
       />
       {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
+
+      <div className="mb-6">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-primary">Finance this month</h2>
+          <Link to={ROUTES.admin.finance} className="text-sm font-medium text-secondary hover:underline">
+            Open finance →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {financeCards.map((card) => (
+            <Link
+              key={card.label}
+              to={ROUTES.admin.finance}
+              className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:border-secondary/40"
+            >
+              <p
+                className={`text-2xl font-bold ${
+                  card.label.includes('Profit') && card.value < 0 ? 'text-red-700' : 'text-primary'
+                }`}
+              >
+                {money(card.value)}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{card.label}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
@@ -97,6 +143,9 @@ export default function AdminDashboardPage() {
 
         <PortalCard title="Quick CRM actions">
           <div className="flex flex-col gap-3 text-sm">
+            <Link to={ROUTES.admin.finance} className="text-secondary hover:underline">
+              Record expenses and income →
+            </Link>
             <Link to={ROUTES.admin.leads} className="text-secondary hover:underline">
               Review and convert leads →
             </Link>
