@@ -336,6 +336,19 @@ export const studentApi = {
     await apiClient.delete(`/student/documents/${id}`)
   },
 
+  openDocumentFile: async (id: string, fileUrl?: string) => {
+    if (fileUrl && /^https?:\/\//i.test(fileUrl)) {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+    const { data } = await apiClient.get<Blob>(`/student/documents/${id}/file`, {
+      responseType: 'blob',
+    })
+    const objectUrl = URL.createObjectURL(data)
+    window.open(objectUrl, '_blank', 'noopener,noreferrer')
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+  },
+
   listPayments: async () => {
     const { data } = await apiClient.get<PaymentResponse[]>('/student/payments')
     return data.map(mapPayment)

@@ -66,14 +66,17 @@ export default function AdminDocumentsPage() {
                     {doc.studentName} · {doc.studentEmail}
                   </p>
                   {doc.fileUrl && (
-                    <a
-                      href={doc.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
                       className="mt-1 inline-block text-sm text-secondary hover:underline"
+                      onClick={() => {
+                        void adminApi
+                          .openAdminDocumentFile(doc.id, doc.fileUrl)
+                          .catch((err) => setError(getErrorMessage(err)))
+                      }}
                     >
                       Open file
-                    </a>
+                    </button>
                   )}
                 </div>
                 <div className="flex items-center gap-3">

@@ -469,14 +469,17 @@ export default function AdminFinancePage() {
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                       {entry.attachmentUrl ? (
                         <>
-                          <a
-                            href={entry.attachmentUrl}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            type="button"
                             className="font-medium text-secondary hover:underline"
+                            onClick={() => {
+                              void adminApi
+                                .openFinanceAttachment(entry.id, entry.attachmentUrl)
+                                .catch((err) => setError(getErrorMessage(err)))
+                            }}
                           >
                             View receipt
-                          </a>
+                          </button>
                           {canWrite && (
                             <button
                               type="button"

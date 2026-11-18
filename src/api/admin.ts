@@ -891,6 +891,32 @@ export const adminApi = {
     return mapFinanceEntry(data)
   },
 
+  openFinanceAttachment: async (id: string, attachmentUrl?: string) => {
+    if (attachmentUrl && /^https?:\/\//i.test(attachmentUrl)) {
+      window.open(attachmentUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+    const { data } = await apiClient.get<Blob>(`/admin/finance/entries/${id}/file`, {
+      responseType: 'blob',
+    })
+    const objectUrl = URL.createObjectURL(data)
+    window.open(objectUrl, '_blank', 'noopener,noreferrer')
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+  },
+
+  openAdminDocumentFile: async (id: string, fileUrl?: string) => {
+    if (fileUrl && /^https?:\/\//i.test(fileUrl)) {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+    const { data } = await apiClient.get<Blob>(`/admin/documents/${id}/file`, {
+      responseType: 'blob',
+    })
+    const objectUrl = URL.createObjectURL(data)
+    window.open(objectUrl, '_blank', 'noopener,noreferrer')
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+  },
+
   updateFinanceEntry: async (id: string, payload: FinanceEntryUpdatePayload) => {
     await apiClient.patch(`/admin/finance/entries/${id}`, {
       entry_date: payload.entryDate,
