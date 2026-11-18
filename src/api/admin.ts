@@ -844,26 +844,24 @@ export const adminApi = {
     )
   },
 
-  createFinanceEntry: async (payload: FinanceEntryCreatePayload) => {
-    const { data } = await apiClient.post<{
-      id: string
-      entry_date: string
-      type: FinanceEntry['type']
-      category: FinanceEntry['category']
-      title: string
-      amount: string | number
-      currency: string
-      paid_by_name?: string
-      paid_by_user_id?: string
-      payment_method: FinanceEntry['paymentMethod']
-      notes?: string
-      attachment_url?: string
-      is_active: boolean
-      created_by_id?: string
-      created_by_name?: string
-      created_at: string
-      updated_at: string
-    }>('/admin/finance/entries', {
+  createFinanceEntry: async (payload: FinanceEntryCreatePayload & { file?: File }) => {
+    if (payload.file) {
+      const formData = new FormData()
+      formData.append('entry_date', payload.entryDate)
+      formData.append('type', payload.type)
+      formData.append('category', payload.category)
+      formData.append('title', payload.title)
+      formData.append('amount', String(payload.amount))
+      formData.append('currency', payload.currency ?? 'PKR')
+      formData.append('payment_method', payload.paymentMethod ?? 'cash')
+      if (payload.paidByName) formData.append('paid_by_name', payload.paidByName)
+      if (payload.notes) formData.append('notes', payload.notes)
+      formData.append('file', payload.file)
+      const { data } = await apiClient.post<FinanceEntryResponseRaw>('/admin/finance/entries/upload', formData)
+      return mapFinanceEntry(data)
+    }
+
+    const { data } = await apiClient.post<FinanceEntryResponseRaw>('/admin/finance/entries', {
       entry_date: payload.entryDate,
       type: payload.type,
       category: payload.category,
@@ -875,25 +873,22 @@ export const adminApi = {
       payment_method: payload.paymentMethod ?? 'cash',
       notes: payload.notes,
     })
-    return {
-      id: data.id,
-      entryDate: data.entry_date,
-      type: data.type,
-      category: data.category,
-      title: data.title,
-      amount: Number(data.amount),
-      currency: data.currency,
-      paidByName: data.paid_by_name,
-      paidByUserId: data.paid_by_user_id,
-      paymentMethod: data.payment_method,
-      notes: data.notes,
-      attachmentUrl: data.attachment_url,
-      isActive: data.is_active,
-      createdById: data.created_by_id,
-      createdByName: data.created_by_name,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-    } satisfies FinanceEntry
+    return mapFinanceEntry(data)
+  },
+
+  uploadFinanceAttachment: async (id: string, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await apiClient.post<FinanceEntryResponseRaw>(
+      `/admin/finance/entries/${id}/attachment`,
+      formData,
+    )
+    return mapFinanceEntry(data)
+  },
+
+  removeFinanceAttachment: async (id: string) => {
+    const { data } = await apiClient.delete<FinanceEntryResponseRaw>(`/admin/finance/entries/${id}/attachment`)
+    return mapFinanceEntry(data)
   },
 
   updateFinanceEntry: async (id: string, payload: FinanceEntryUpdatePayload) => {
@@ -915,4 +910,46 @@ export const adminApi = {
   deleteFinanceEntry: async (id: string) => {
     await apiClient.delete(`/admin/finance/entries/${id}`)
   },
+}
+
+interface FinanceEntryResponseRaw {
+  id: string
+  entry_date: string
+  type: FinanceEntry['type']
+  category: FinanceEntry['category']
+  title: string
+  amount: string | number
+  currency: string
+  paid_by_name?: string
+  paid_by_user_id?: string
+  payment_method: FinanceEntry['paymentMethod']
+  notes?: string
+  attachment_url?: string
+  is_active: boolean
+  created_by_id?: string
+  created_by_name?: string
+  created_at: string
+  updated_at: string
+}
+
+function mapFinanceEntry(data: FinanceEntryResponseRaw): FinanceEntry {
+  return {
+    id: data.id,
+    entryDate: data.entry_date,
+    type: data.type,
+    category: data.category,
+    title: data.title,
+    amount: Number(data.amount),
+    currency: data.currency,
+    paidByName: data.paid_by_name,
+    paidByUserId: data.paid_by_user_id,
+    paymentMethod: data.payment_method,
+    notes: data.notes,
+    attachmentUrl: data.attachment_url,
+    isActive: data.is_active,
+    createdById: data.created_by_id,
+    createdByName: data.created_by_name,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }

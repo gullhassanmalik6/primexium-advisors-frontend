@@ -102,6 +102,8 @@ export default function AdminFinancePage() {
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [attachingId, setAttachingId] = useState<string | null>(null)
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [from, setFrom] = useState(defaults.from)
   const [to, setTo] = useState(defaults.to)
   const [typeFilter, setTypeFilter] = useState<'' | FinanceEntryType>('')
@@ -182,6 +184,7 @@ export default function AdminFinancePage() {
         paidByName: values.paidByName?.trim() || undefined,
         paymentMethod: values.paymentMethod,
         notes: values.notes?.trim() || undefined,
+        file: receiptFile || undefined,
       })
       reset({
         entryDate: new Date().toISOString().slice(0, 10),
@@ -194,6 +197,7 @@ export default function AdminFinancePage() {
         paymentMethod: 'cash',
         notes: '',
       })
+      setReceiptFile(null)
       setShowForm(false)
       setLoading(true)
       await load()
@@ -215,6 +219,35 @@ export default function AdminFinancePage() {
       setError(getErrorMessage(err))
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  const attachReceipt = async (entry: FinanceEntry, file: File | null) => {
+    if (!canWrite || !file) return
+    setAttachingId(entry.id)
+    setError(null)
+    try {
+      const updated = await adminApi.uploadFinanceAttachment(entry.id, file)
+      setEntries((prev) => prev.map((item) => (item.id === entry.id ? updated : item)))
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setAttachingId(null)
+    }
+  }
+
+  const removeReceipt = async (entry: FinanceEntry) => {
+    if (!canWrite || !entry.attachmentUrl) return
+    const confirmed = window.confirm(`Remove receipt for “${entry.title}”?`)
+    if (!confirmed) return
+    setAttachingId(entry.id)
+    try {
+      const updated = await adminApi.removeFinanceAttachment(entry.id)
+      setEntries((prev) => prev.map((item) => (item.id === entry.id ? updated : item)))
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setAttachingId(null)
     }
   }
 
@@ -342,6 +375,17 @@ export default function AdminFinancePage() {
             <FormField label="Notes" error={errors.notes?.message} className="md:col-span-2">
               <Textarea rows={3} placeholder="Optional details for the team" {...register('notes')} />
             </FormField>
+            <FormField label="Receipt / proof (optional)" className="md:col-span-2">
+              <Input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)}
+              />
+              <p className="text-xs text-muted-foreground">PDF, JPG, PNG, or WEBP — max 8 MB</p>
+              {receiptFile && (
+                <p className="break-words text-xs text-muted-foreground">Selected: {receiptFile.name}</p>
+              )}
+            </FormField>
             <input type="hidden" {...register('currency')} value="PKR" />
             <div className="md:col-span-2">
               <Button type="submit" disabled={isSubmitting}>
@@ -422,6 +466,52 @@ export default function AdminFinancePage() {
                         {entry.notes}
                       </p>
                     )}
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                      {entry.attachmentUrl ? (
+                        <>
+                          <a
+                            href={entry.attachmentUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-secondary hover:underline"
+                          >
+                            View receipt
+                          </a>
+                          {canWrite && (
+                            <button
+                              type="button"
+                              className="text-destructive hover:underline disabled:opacity-50"
+                              disabled={attachingId === entry.id}
+                              onClick={() => void removeReceipt(entry)}
+                            >
+                              Remove receipt
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">Receipt: Not provided</span>
+                      )}
+                      {canWrite && (
+                        <label className="cursor-pointer font-medium text-secondary hover:underline">
+                          {attachingId === entry.id
+                            ? 'Uploading...'
+                            : entry.attachmentUrl
+                              ? 'Replace receipt'
+                              : 'Attach receipt'}
+                          <input
+                            type="file"
+                            className="sr-only"
+                            accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                            disabled={attachingId === entry.id}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] ?? null
+                              e.target.value = ''
+                              void attachReceipt(entry, file)
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
                   </div>
                   <div className="flex flex-col items-stretch gap-2 sm:items-end">
                     <p
