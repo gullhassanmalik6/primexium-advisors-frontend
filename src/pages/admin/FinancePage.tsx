@@ -65,7 +65,6 @@ const schema = z.object({
     .string()
     .min(1, 'Amount is required')
     .refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, 'Amount must be positive'),
-  currency: z.string().min(1),
   paidByName: z.string().trim().max(120).optional().or(z.literal('')),
   paymentMethod: z.enum(['cash', 'bank', 'jazzcash', 'easypaisa', 'card', 'other']),
   notes: z.string().trim().max(5000).optional().or(z.literal('')),
@@ -84,11 +83,18 @@ function typeTone(type: FinanceEntryType) {
   return 'warning'
 }
 
+/** Local calendar date as YYYY-MM-DD (avoid UTC shift from toISOString). */
+function localDateISO(value = new Date()) {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function monthBounds(d = new Date()) {
   const from = new Date(d.getFullYear(), d.getMonth(), 1)
   const to = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-  const iso = (value: Date) => value.toISOString().slice(0, 10)
-  return { from: iso(from), to: iso(to) }
+  return { from: localDateISO(from), to: localDateISO(to) }
 }
 
 export default function AdminFinancePage() {
@@ -100,6 +106,7 @@ export default function AdminFinancePage() {
   const [entries, setEntries] = useState<FinanceEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [attachingId, setAttachingId] = useState<string | null>(null)
@@ -119,12 +126,11 @@ export default function AdminFinancePage() {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      entryDate: new Date().toISOString().slice(0, 10),
+      entryDate: localDateISO(),
       type: 'expense',
       category: 'transport',
       title: '',
       amount: '',
-      currency: 'PKR',
       paidByName: '',
       paymentMethod: 'cash',
       notes: '',
@@ -144,14 +150,16 @@ export default function AdminFinancePage() {
     }
   }, [categoryOptions, selectedCategory, setValue])
 
-  const load = async () => {
+  const load = async (range?: { from: string; to: string }) => {
+    const rangeFrom = range?.from ?? from
+    const rangeTo = range?.to ?? to
     setError(null)
     try {
       const [summaryData, entryData] = await Promise.all([
-        adminApi.getFinanceSummary({ from, to }),
+        adminApi.getFinanceSummary({ from: rangeFrom, to: rangeTo }),
         adminApi.listFinanceEntries({
-          from,
-          to,
+          from: rangeFrom,
+          to: rangeTo,
           type: typeFilter || undefined,
           paidBy: paidByFilter.trim() || undefined,
         }),
@@ -172,35 +180,57 @@ export default function AdminFinancePage() {
   }, [from, to, typeFilter, paidByFilter])
 
   const onSubmit = async (values: FormValues) => {
-    if (!canWrite) return
+    if (!canWrite) {
+      setError('Only Admin or Finance roles can add ledger entries.')
+      return
+    }
+    setError(null)
+    setSuccess(null)
     try {
-      await adminApi.createFinanceEntry({
+      // Always create the ledger row first; attach receipt afterward so a file
+      // problem cannot block the expense from being saved.
+      const created = await adminApi.createFinanceEntry({
         entryDate: values.entryDate,
         type: values.type,
         category: values.category as FinanceCategory,
         title: values.title.trim(),
         amount: Number(values.amount),
-        currency: values.currency,
+        currency: 'PKR',
         paidByName: values.paidByName?.trim() || undefined,
         paymentMethod: values.paymentMethod,
         notes: values.notes?.trim() || undefined,
-        file: receiptFile || undefined,
       })
+
+      let receiptWarning: string | null = null
+      if (receiptFile) {
+        try {
+          await adminApi.uploadFinanceAttachment(created.id, receiptFile)
+        } catch (receiptErr) {
+          receiptWarning = `Entry saved, but receipt upload failed: ${getErrorMessage(receiptErr)}`
+        }
+      }
+
+      // Keep filters wide enough to show the entry that was just saved.
+      const nextFrom = values.entryDate < from ? values.entryDate : from
+      const nextTo = values.entryDate > to ? values.entryDate : to
+      if (nextFrom !== from) setFrom(nextFrom)
+      if (nextTo !== to) setTo(nextTo)
+
       reset({
-        entryDate: new Date().toISOString().slice(0, 10),
+        entryDate: localDateISO(),
         type: 'expense',
         category: 'transport',
         title: '',
         amount: '',
-        currency: 'PKR',
         paidByName: '',
         paymentMethod: 'cash',
         notes: '',
       })
       setReceiptFile(null)
       setShowForm(false)
+      setSuccess(receiptWarning ?? `Saved “${created.title}” (${money(created.amount)}).`)
       setLoading(true)
-      await load()
+      await load({ from: nextFrom, to: nextTo })
     } catch (err) {
       setError(getErrorMessage(err))
     }
@@ -283,6 +313,7 @@ export default function AdminFinancePage() {
         }
       />
       {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
+      {success && <p className="mb-4 text-sm text-emerald-700">{success}</p>}
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <FormField label="From">
@@ -386,7 +417,6 @@ export default function AdminFinancePage() {
                 <p className="break-words text-xs text-muted-foreground">Selected: {receiptFile.name}</p>
               )}
             </FormField>
-            <input type="hidden" {...register('currency')} value="PKR" />
             <div className="md:col-span-2">
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : 'Save entry'}

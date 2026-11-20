@@ -844,23 +844,7 @@ export const adminApi = {
     )
   },
 
-  createFinanceEntry: async (payload: FinanceEntryCreatePayload & { file?: File }) => {
-    if (payload.file) {
-      const formData = new FormData()
-      formData.append('entry_date', payload.entryDate)
-      formData.append('type', payload.type)
-      formData.append('category', payload.category)
-      formData.append('title', payload.title)
-      formData.append('amount', String(payload.amount))
-      formData.append('currency', payload.currency ?? 'PKR')
-      formData.append('payment_method', payload.paymentMethod ?? 'cash')
-      if (payload.paidByName) formData.append('paid_by_name', payload.paidByName)
-      if (payload.notes) formData.append('notes', payload.notes)
-      formData.append('file', payload.file)
-      const { data } = await apiClient.post<FinanceEntryResponseRaw>('/admin/finance/entries/upload', formData)
-      return mapFinanceEntry(data)
-    }
-
+  createFinanceEntry: async (payload: FinanceEntryCreatePayload) => {
     const { data } = await apiClient.post<FinanceEntryResponseRaw>('/admin/finance/entries', {
       entry_date: payload.entryDate,
       type: payload.type,

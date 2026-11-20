@@ -19,11 +19,17 @@ function money(amount: number) {
   return `PKR ${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 }
 
+function localDateISO(value = new Date()) {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function monthBounds(d = new Date()) {
   const from = new Date(d.getFullYear(), d.getMonth(), 1)
   const to = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-  const iso = (value: Date) => value.toISOString().slice(0, 10)
-  return { from: iso(from), to: iso(to) }
+  return { from: localDateISO(from), to: localDateISO(to) }
 }
 
 export default function AdminDashboardPage() {
